@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>以图搜图 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .upload-zone { border: 2px dashed #d1d5db; transition: all 0.3s; cursor: pointer; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: #3b82f6; background: #eff6ff; }
+        .result-card { transition: all 0.2s; cursor: pointer; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .similarity-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .similarity-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div><div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div></div></div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700"><div class="flex items-center gap-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600"><div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div><a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a></div></div>
+        </aside>
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600"><i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>预警管理</span><span class="text-gray-400">/</span><span class="text-gray-800">以图搜图</span></div>
+                <div class="flex items-center gap-4"><span class="text-sm text-gray-500" id="currentTime"></span><button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button></div>
+            </header>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- 左侧: 上传区域 -->
+                    <div class="col-span-4">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                            <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-cloud-upload-alt text-blue-500 mr-2"></i>上传照片</h3>
+                            <div class="upload-zone rounded-xl p-8 text-center" id="uploadZone">
+                                <i class="fas fa-image text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-sm text-gray-500 mb-1">点击或拖拽上传照片</p>
+                                <p class="text-xs text-gray-400">支持 JPG/PNG，最大 10MB</p>
+                                <input type="file" class="hidden" id="fileInput" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                            <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-sliders-h text-purple-500 mr-2"></i>搜索参数</h3>
+                            <div class="space-y-3">
+                                <div><label class="block text-sm text-gray-600 mb-1">相似度阈值</label><div class="flex items-center gap-2"><input type="range" class="flex-1" min="50" max="100" value="80" id="threshold"><span class="text-sm font-medium text-blue-500" id="thresholdVal">80%</span></div></div>
+                                <div><label class="block text-sm text-gray-600 mb-1">搜索范围</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"><option>全监人员库</option><option>在押罪犯</option><option>警察/职工</option><option>外来人员</option></select></div>
+                                <div><label class="block text-sm text-gray-600 mb-1">时间范围</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"><option>最近7天</option><option>最近30天</option><option>最近90天</option><option>全部</option></select></div>
+                                <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search mr-1"></i>开始搜索</button>
+                            </div>
+                        </div>
+                        <!-- 已上传预览 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                            <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-image text-green-500 mr-2"></i>查询照片</h3>
+                            <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400"><div class="text-center"><i class="fas fa-user text-5xl mb-2"></i><p class="text-sm">待上传照片</p></div></div>
+                        </div>
+                    </div>
+                    <!-- 右侧: 搜索结果 -->
+                    <div class="col-span-8">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800"><i class="fas fa-search text-blue-500 mr-2"></i>搜索结果</h3>
+                                <span class="text-sm text-gray-500">找到 <span class="text-blue-500 font-bold">6</span> 个相似人员 (≥80%)</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="result-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-4"><div class="flex items-center gap-3">
+                                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                                    <div class="flex-1"><h4 class="font-semibold">张三</h4><p class="text-xs text-gray-500">PR-0012 · 一监区</p><div class="mt-2"><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">相似度</span><span class="text-xs font-bold text-green-600">95.2%</span></div><div class="similarity-bar"><div class="similarity-fill bg-green-500" style="width:95.2%"></div></div></div></div>
+                                </div></div>
+                                <div class="px-4 pb-3"><p class="text-xs text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i>最近出现: 2026-04-28 14:32 · 严管区A区</p></div>
+                            </div>
+                            <div class="result-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-4"><div class="flex items-center gap-3">
+                                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                                    <div class="flex-1"><h4 class="font-semibold">李四</h4><p class="text-xs text-gray-500">PR-0035 · 二监区</p><div class="mt-2"><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">相似度</span><span class="text-xs font-bold text-green-600">91.8%</span></div><div class="similarity-bar"><div class="similarity-fill bg-green-500" style="width:91.8%"></div></div></div></div>
+                                </div></div>
+                                <div class="px-4 pb-3"><p class="text-xs text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i>最近出现: 2026-04-28 13:15 · AB门通道</p></div>
+                            </div>
+                            <div class="result-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-4"><div class="flex items-center gap-3">
+                                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                                    <div class="flex-1"><h4 class="font-semibold">王五</h4><p class="text-xs text-gray-500">PR-0078 · 一监区</p><div class="mt-2"><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">相似度</span><span class="text-xs font-bold text-blue-600">88.5%</span></div><div class="similarity-bar"><div class="similarity-fill bg-blue-500" style="width:88.5%"></div></div></div></div>
+                                </div></div>
+                                <div class="px-4 pb-3"><p class="text-xs text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i>最近出现: 2026-04-28 10:22 · 2号车间</p></div>
+                            </div>
+                            <div class="result-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-4"><div class="flex items-center gap-3">
+                                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                                    <div class="flex-1"><h4 class="font-semibold">赵六</h4><p class="text-xs text-gray-500">PR-0091 · 三监区</p><div class="mt-2"><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">相似度</span><span class="text-xs font-bold text-blue-600">85.3%</span></div><div class="similarity-bar"><div class="similarity-fill bg-blue-500" style="width:85.3%"></div></div></div></div>
+                                </div></div>
+                                <div class="px-4 pb-3"><p class="text-xs text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i>最近出现: 2026-04-27 22:05 · 操场北侧</p></div>
+                            </div>
+                        </div>
+                        <!-- 历史通行记录 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-4">
+                            <div class="p-4 border-b border-gray-100"><h3 class="font-semibold text-gray-800"><i class="fas fa-history text-gray-400 mr-2"></i>匹配人员历史通行记录 (张三 PR-0012)</h3></div>
+                            <table class="w-full">
+                                <thead><tr class="bg-gray-50 border-b border-gray-100"><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">时间</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">区域</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">设备</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">方向</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">验证方式</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-2 text-xs">2026-04-28 14:32</td><td class="px-4 py-2 text-xs">严管区A区</td><td class="px-4 py-2 text-xs">人脸识别-C015</td><td class="px-4 py-2 text-xs"><span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">进入</span></td><td class="px-4 py-2 text-xs">人脸识别</td></tr>
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-2 text-xs">2026-04-28 13:15</td><td class="px-4 py-2 text-xs">AB门通道</td><td class="px-4 py-2 text-xs">门禁-G001</td><td class="px-4 py-2 text-xs"><span class="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs">离开</span></td><td class="px-4 py-2 text-xs">刷卡+人脸</td></tr>
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-2 text-xs">2026-04-28 10:22</td><td class="px-4 py-2 text-xs">2号车间</td><td class="px-4 py-2 text-xs">人脸识别-C008</td><td class="px-4 py-2 text-xs"><span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">进入</span></td><td class="px-4 py-2 text-xs">人脸识别</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-xs">2026-04-27 22:05</td><td class="px-4 py-2 text-xs">操场北侧</td><td class="px-4 py-2 text-xs">PDA-P003</td><td class="px-4 py-2 text-xs"><span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">进入</span></td><td class="px-4 py-2 text-xs">PDA扫码</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function updateTime(){const n=new Date();document.getElementById('currentTime').textContent=n.toLocaleString('zh-CN');}updateTime();setInterval(updateTime,1000);
+        document.getElementById('threshold').addEventListener('input',function(){document.getElementById('thresholdVal').textContent=this.value+'%';});
+        const zone=document.getElementById('uploadZone');const input=document.getElementById('fileInput');
+        zone.addEventListener('click',()=>input.click());
+        zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');});
+        zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+        zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragover');});
+    </script>
+</body>
+</html>

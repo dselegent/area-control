@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人员点名管理 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .status-tag { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+        .status-waiting { background: #fef3c7; color: #92400e; }
+        .status-running { background: #dbeafe; color: #1e40af; }
+        .status-done { background: #d1fae5; color: #065f46; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; animation: modalSlide 0.3s ease; }
+        @keyframes modalSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .person-card { transition: all 0.2s; }
+        .person-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring-circle { transition: stroke-dashoffset 0.5s ease; }
+        .offline-banner { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .sync-progress-bar { transition: width 0.5s ease; }
+        .conflict-row { border-left: 4px solid #f59e0b; }
+        .conflict-row.resolved { border-left-color: #10b981; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm">AI区域管控系统</h1>
+                        <p class="text-xs text-gray-400">湖南省监狱</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div>
+                    <a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>人员点名管理</span><span class="text-gray-400">/</span><span class="text-gray-800">点名记录</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 操作栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <button onclick="openModal('startCallModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1"><i class="fas fa-play"></i>发起点名</button>
+                            <button onclick="openModal('scheduleCallModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-clock"></i>定时点名</button>
+                            <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-download"></i>导出</button>
+                            <a href="report.html" class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 flex items-center gap-1"><i class="fas fa-file-alt"></i>点名报告</a>
+                            <button onclick="openModal('offlineSyncModal')" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600 flex items-center gap-1"><i class="fas fa-sync-alt"></i>PDA离线同步</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="搜索点名任务" class="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <button class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDA离线状态提示 -->
+                <div class="offline-banner rounded-xl p-3 mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-white">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                        <div>
+                            <p class="text-sm font-medium">检测到 2 台PDA设备离线</p>
+                            <p class="text-xs opacity-80">王警官 (PDA-003)、赵警官 (PDA-005) 离线，离线点名数据将在设备恢复连接后自动同步</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('offlineSyncModal')" class="px-4 py-2 bg-white/20 text-white rounded-lg text-sm hover:bg-white/30"><i class="fas fa-sync-alt mr-1"></i>查看同步状态</button>
+                    </div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">今日点名</p><p class="text-2xl font-bold text-gray-800 mt-1">5</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-clipboard-check text-blue-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">进行中</p><p class="text-2xl font-bold text-blue-500 mt-1">2</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-spinner text-blue-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">已完成</p><p class="text-2xl font-bold text-green-500 mt-1">3</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center"><i class="fas fa-check-circle text-green-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">平均点名率</p><p class="text-2xl font-bold text-purple-500 mt-1">98.5%</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-chart-line text-purple-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">标题</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">部门名称</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名警察</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">应点人数</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">已点人数</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">未点人数</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">创建时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">早起点名-1-1监区</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-running">例行点名</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">张警官</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-running">点名中</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">179</td>
+                                <td class="px-4 py-3 text-sm text-green-600 font-medium">172</td>
+                                <td class="px-4 py-3 text-sm text-red-600 font-medium">7</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-03-26</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button onclick="openModal('callModal')" class="text-blue-500 hover:text-blue-600 text-sm">点名</button>
+                                        <button onclick="openModal('callDetailModal')" class="text-gray-500 hover:text-gray-600 text-sm">明细</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">午餐点名-1-2监区</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-running">例行点名</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-2监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">李警官</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-running">点名中</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">188</td>
+                                <td class="px-4 py-3 text-sm text-green-600 font-medium">180</td>
+                                <td class="px-4 py-3 text-sm text-red-600 font-medium">8</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-03-26</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm">点名</button>
+                                        <a href="detail.html" class="text-gray-500 hover:text-gray-600 text-sm">明细</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">晚落锁点名-严管区</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-done">例行点名</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">严管区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">王警官</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-done">点名结束</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">86</td>
+                                <td class="px-4 py-3 text-sm text-green-600 font-medium">86</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">0</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-03-26</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-gray-500 hover:text-gray-600 text-sm">明细</a>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm">报告</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">午休点名-2-1监区</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-waiting">即时点名</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2-1监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">赵警官</td>
+                                <td class="px-4 py-3 text-sm"><span class="status-tag status-waiting">待开始</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">190</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-03-26</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm">开始</button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm">取消</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-sm text-gray-500">共 29657 条记录</span>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">上一页</button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                            <span class="text-gray-400">...</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2966</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 定时点名弹窗 -->
+    <div class="modal" id="scheduleCallModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg"><i class="fas fa-clock text-blue-500 mr-2"></i>定时点名配置</h3>
+                <button onclick="closeModal('scheduleCallModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名名称 *</label>
+                        <input type="text" placeholder="如：早起点名、午餐点名" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">点名时间 *</label>
+                            <input type="time" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">点名类型</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option>例行点名</option>
+                                <option>定时点名</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">重复周期 *</label>
+                        <div class="flex gap-2 flex-wrap">
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500" checked>
+                                <span class="text-sm">周一</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500" checked>
+                                <span class="text-sm">周二</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500" checked>
+                                <span class="text-sm">周三</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500" checked>
+                                <span class="text-sm">周四</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500" checked>
+                                <span class="text-sm">周五</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500">
+                                <span class="text-sm">周六</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="rounded text-blue-500">
+                                <span class="text-sm">周日</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">选择部门 *</label>
+                        <div class="border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm">1-1监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm">1-2监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm">2-1监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm">2-2监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500"><span class="text-sm">严管区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500"><span class="text-sm">医疗监区</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名方式</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="scheduleCallType" class="text-blue-500" checked><span class="text-sm">PDA人脸识别</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="scheduleCallType" class="text-blue-500"><span class="text-sm">固定点位人脸</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="scheduleCallType" class="text-blue-500"><span class="text-sm">工控机刷卡</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名时限（分钟）</label>
+                        <input type="number" value="30" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="enableSchedule" class="rounded text-blue-500" checked>
+                        <label for="enableSchedule" class="text-sm text-gray-700">启用该定时任务</label>
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('scheduleCallModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('scheduleCallModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 点名明细弹窗 -->
+    <div class="modal" id="callDetailModal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-lg"><i class="fas fa-list-alt text-blue-500 mr-2"></i>点名明细 - 早起点名-1-1监区</h3>
+                    <p class="text-sm text-gray-500 mt-1">张警官 | 2026-03-26 07:00 | 应点179人</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm"><i class="fas fa-check-circle mr-1"></i>已点 172</span>
+                    <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm"><i class="fas fa-times-circle mr-1"></i>未点 7</span>
+                    <button onclick="closeModal('callDetailModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+            </div>
+            <div class="p-4">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-5 gap-4 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-blue-600">96.1%</p>
+                        <p class="text-xs text-gray-600">点名率</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-green-600">172</p>
+                        <p class="text-xs text-gray-600">已点人数</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-red-600">7</p>
+                        <p class="text-xs text-gray-600">未点人数</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-yellow-600">3</p>
+                        <p class="text-xs text-gray-600">迟到人数</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-purple-600">2</p>
+                        <p class="text-xs text-gray-600">请假/流动</p>
+                    </div>
+                </div>
+
+                <!-- 筛选和导出 -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg">全部(179)</button>
+                        <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">已点(172)</button>
+                        <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">未点(7)</button>
+                        <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">异常(5)</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="搜索姓名/编号" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                        <button class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search mr-1"></i>查询</button>
+                        <button class="px-4 py-1.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-download mr-1"></i>导出</button>
+                    </div>
+                </div>
+
+                <!-- 人员明细表格 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">序号</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">人员信息</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">监区/床位</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名地点</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">验证方式</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">1</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p1" class="w-8 h-8 rounded bg-gray-100">
+                                        <div>
+                                            <p class="text-sm font-medium">张三</p>
+                                            <p class="text-xs text-gray-500">2024001</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区 / 101-02</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs"><i class="fas fa-check mr-1"></i>正常</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">07:05:23</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区大厅</td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><i class="fas fa-camera text-blue-500 mr-1"></i>人脸识别</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p2" class="w-8 h-8 rounded bg-gray-100">
+                                        <div>
+                                            <p class="text-sm font-medium">李四</p>
+                                            <p class="text-xs text-gray-500">2024002</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区 / 101-05</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs"><i class="fas fa-check mr-1"></i>正常</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">07:06:45</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区大厅</td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><i class="fas fa-camera text-blue-500 mr-1"></i>人脸识别</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">3</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p3" class="w-8 h-8 rounded bg-gray-100">
+                                        <div>
+                                            <p class="text-sm font-medium">王五</p>
+                                            <p class="text-xs text-gray-500">2024003</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区 / 102-01</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-600 rounded text-xs"><i class="fas fa-clock mr-1"></i>迟到</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">07:32:18</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区大厅</td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><i class="fas fa-id-card text-green-500 mr-1"></i>刷卡</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">睡懒觉</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 bg-red-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">4</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p4" class="w-8 h-8 rounded bg-gray-100">
+                                        <div>
+                                            <p class="text-sm font-medium">赵六</p>
+                                            <p class="text-xs text-gray-500">2024004</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区 / 103-02</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs"><i class="fas fa-times mr-1"></i>未点</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                                <td class="px-4 py-3 text-sm text-red-600"><i class="fas fa-exclamation-triangle mr-1"></i>需核查</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">5</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p5" class="w-8 h-8 rounded bg-gray-100">
+                                        <div>
+                                            <p class="text-sm font-medium">钱七</p>
+                                            <p class="text-xs text-gray-500">2024005</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区 / 103-05</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs"><i class="fas fa-walking mr-1"></i>流动</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">-</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">外出就医</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-sm text-gray-500">显示 1-5 条，共 179 条记录</span>
+                    <div class="flex gap-1">
+                        <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-400" disabled>上一页</button>
+                        <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                        <span class="text-gray-400">...</span>
+                        <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">36</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('callDetailModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fas fa-file-alt mr-1"></i>生成报告</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发起点名弹窗 -->
+    <div class="modal" id="startCallModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">发起即时点名</h3>
+                <button onclick="closeModal('startCallModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名标题 *</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请输入点名标题">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">点名类型 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option>即时点名</option>
+                                <option>例行点名</option>
+                                <option>定时点名</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">点名范围 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option>本监区</option>
+                                <option>全监</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">选择部门</label>
+                        <div class="border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500"><span class="text-sm">1-1监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm">1-2监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500"><span class="text-sm">2-1监区</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500"><span class="text-sm">严管区</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名方式</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="callType" class="text-blue-500" checked><span class="text-sm">PDA人脸识别</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="callType" class="text-blue-500"><span class="text-sm">固定点位人脸</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="callType" class="text-blue-500"><span class="text-sm">工控机刷卡</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名时限（分钟）</label>
+                        <input type="number" value="30" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('startCallModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('startCallModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">发起点名</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 点名执行弹窗 -->
+    <div class="modal" id="callModal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-lg">早起点名 - 1-1监区</h3>
+                    <p class="text-sm text-gray-500 mt-1">张警官 | 2026-03-26 07:00</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-center">
+                        <div class="relative w-16 h-16">
+                            <svg class="progress-ring w-16 h-16" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="56" stroke-linecap="round" class="progress-ring-circle"/>
+                            </svg>
+                            <span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-800">80%</span>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('callModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+            </div>
+            <div class="p-4 flex gap-4" style="height: 500px;">
+                <!-- 左侧人员列表 -->
+                <div class="w-1/3 border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+                        <span class="font-medium text-sm">人员列表</span>
+                        <span class="text-xs text-gray-500">172/179</span>
+                    </div>
+                    <div class="flex border-b border-gray-100">
+                        <button class="flex-1 py-2 text-xs font-medium text-blue-600 border-b-2 border-blue-500 bg-blue-50">未点(7)</button>
+                        <button class="flex-1 py-2 text-xs font-medium text-gray-500">已点(172)</button>
+                        <button class="flex-1 py-2 text-xs font-medium text-gray-500">流动(0)</button>
+                    </div>
+                    <div class="overflow-y-auto p-2" style="height: 380px;">
+                        <div class="person-card p-2 border border-gray-100 rounded-lg mb-2 cursor-pointer hover:border-blue-300">
+                            <div class="flex items-center gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p1" class="w-10 h-10 rounded bg-gray-100">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">张三</p>
+                                    <p class="text-xs text-gray-500">2024001</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="person-card p-2 border border-gray-100 rounded-lg mb-2 cursor-pointer hover:border-blue-300">
+                            <div class="flex items-center gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p2" class="w-10 h-10 rounded bg-gray-100">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">李四</p>
+                                    <p class="text-xs text-gray-500">2024002</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="person-card p-2 border border-gray-100 rounded-lg mb-2 cursor-pointer hover:border-blue-300">
+                            <div class="flex items-center gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p3" class="w-10 h-10 rounded bg-gray-100">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">王五</p>
+                                    <p class="text-xs text-gray-500">2024003</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="person-card p-2 border border-gray-100 rounded-lg mb-2 cursor-pointer hover:border-blue-300">
+                            <div class="flex items-center gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p4" class="w-10 h-10 rounded bg-gray-100">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">赵六</p>
+                                    <p class="text-xs text-gray-500">2024004</p>
+                                </div>
+                                <span class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded text-xs">重点关注</span>
+                            </div>
+                        </div>
+                        <div class="person-card p-2 border border-gray-100 rounded-lg mb-2 cursor-pointer hover:border-blue-300">
+                            <div class="flex items-center gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p5" class="w-10 h-10 rounded bg-gray-100">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">钱七</p>
+                                    <p class="text-xs text-gray-500">2024005</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 中间人脸验证 -->
+                <div class="flex-1 border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+                    <div class="flex-1 bg-gray-900 flex items-center justify-center relative">
+                        <div class="text-center text-white">
+                            <div class="w-48 h-48 rounded-full bg-gray-800 mx-auto mb-4 flex items-center justify-center border-4 border-blue-500">
+                                <i class="fas fa-user text-6xl text-gray-600"></i>
+                            </div>
+                            <p class="text-lg mb-2">请将人脸对准摄像头</p>
+                            <p class="text-sm text-gray-400">等待识别...</p>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs">
+                            <i class="fas fa-wifi mr-1"></i>在线
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium">当前识别: 张三</span>
+                            <span class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>识别成功</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-camera mr-1"></i>拍照验证</button>
+                            <button class="flex-1 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-id-card mr-1"></i>刷卡验证</button>
+                            <button class="flex-1 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-hand-paper mr-1"></i>人工确认</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 右侧信息 -->
+                <div class="w-1/4 border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="p-3 border-b border-gray-100 bg-gray-50">
+                        <span class="font-medium text-sm">人员信息</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-center mb-4">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p1" class="w-20 h-20 rounded bg-gray-100 mx-auto">
+                            <h4 class="font-medium mt-2">张三</h4>
+                            <p class="text-xs text-gray-500">2024001</p>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">监区:</span><span>1-1监区</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">床位:</span><span>101-02</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">标签:</span><span class="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs">参与点名</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">风险等级:</span><span class="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs">低风险</span></div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 mb-2">最近一次点名</p>
+                        <p class="text-sm">2026-03-26 06:55</p>
+                        <p class="text-xs text-gray-400">早餐点名 | 已点</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDA离线数据同步弹窗 -->
+    <div class="modal" id="offlineSyncModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg"><i class="fas fa-sync-alt text-amber-500 mr-2"></i>PDA离线数据同步</h3>
+                <button onclick="closeModal('offlineSyncModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <!-- PDA设备状态列表 -->
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">PDA设备状态</h4>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">设备编号</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">使用人</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">所属监区</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">在线状态</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">离线数据量</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">最后同步时间</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="px-4 py-2 text-sm">PDA-001</td>
+                                    <td class="px-4 py-2 text-sm">张警官</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">1-1监区</td>
+                                    <td class="px-4 py-2"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs"><i class="fas fa-circle text-[8px] mr-1"></i>在线</span></td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">0条</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">2026-03-26 07:05</td>
+                                    <td class="px-4 py-2 text-sm text-gray-400">-</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="px-4 py-2 text-sm">PDA-002</td>
+                                    <td class="px-4 py-2 text-sm">李警官</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">1-2监区</td>
+                                    <td class="px-4 py-2"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs"><i class="fas fa-circle text-[8px] mr-1"></i>在线</span></td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">0条</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">2026-03-26 07:03</td>
+                                    <td class="px-4 py-2 text-sm text-gray-400">-</td>
+                                </tr>
+                                <tr class="border-b border-gray-100 bg-amber-50">
+                                    <td class="px-4 py-2 text-sm font-medium">PDA-003</td>
+                                    <td class="px-4 py-2 text-sm">王警官</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">2-1监区</td>
+                                    <td class="px-4 py-2"><span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs"><i class="fas fa-circle text-[8px] mr-1"></i>离线</span></td>
+                                    <td class="px-4 py-2 text-sm text-amber-600 font-medium">43条</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">2026-03-26 06:48</td>
+                                    <td class="px-4 py-2"><button class="text-blue-500 hover:text-blue-600 text-sm" disabled>等待连接</button></td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="px-4 py-2 text-sm">PDA-004</td>
+                                    <td class="px-4 py-2 text-sm">刘警官</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">2-2监区</td>
+                                    <td class="px-4 py-2"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs"><i class="fas fa-circle text-[8px] mr-1"></i>在线</span></td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">0条</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">2026-03-26 07:01</td>
+                                    <td class="px-4 py-2 text-sm text-gray-400">-</td>
+                                </tr>
+                                <tr class="border-b border-gray-100 bg-amber-50">
+                                    <td class="px-4 py-2 text-sm font-medium">PDA-005</td>
+                                    <td class="px-4 py-2 text-sm">赵警官</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600">严管区</td>
+                                    <td class="px-4 py-2"><span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs"><i class="fas fa-circle text-[8px] mr-1"></i>离线</span></td>
+                                    <td class="px-4 py-2 text-sm text-amber-600 font-medium">28条</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">2026-03-26 06:52</td>
+                                    <td class="px-4 py-2"><button class="text-blue-500 hover:text-blue-600 text-sm" disabled>等待连接</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 同步进度 -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3"><i class="fas fa-tasks mr-1 text-blue-500"></i>最近同步记录</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-check text-green-500 text-sm"></i></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">PDA-001 数据同步完成</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full sync-progress-bar" style="width: 100%"></div></div>
+                                    <span class="text-xs text-gray-500">156/156条</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">07:05</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-check text-green-500 text-sm"></i></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">PDA-002 数据同步完成</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full sync-progress-bar" style="width: 100%"></div></div>
+                                    <span class="text-xs text-gray-500">142/142条</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">07:03</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"><i class="fas fa-sync-alt fa-spin text-blue-500 text-sm"></i></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">PDA-004 数据同步中...</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full sync-progress-bar" style="width: 67%"></div></div>
+                                    <span class="text-xs text-gray-500">98/146条</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">进行中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 同步策略配置 -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3"><i class="fas fa-cog mr-1 text-gray-500"></i>同步策略</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">自动同步间隔</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <option>每5分钟</option>
+                                <option selected>每10分钟</option>
+                                <option>每30分钟</option>
+                                <option>手动同步</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">冲突处理策略</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <option selected>人工确认</option>
+                                <option>以PDA数据为准</option>
+                                <option>以服务器数据为准</option>
+                                <option>合并去重</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-4">
+                        <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm text-gray-700">设备恢复连接后自动同步</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-blue-500" checked><span class="text-sm text-gray-700">同步完成自动通知</span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-between">
+                <button onclick="openModal('syncConflictModal')" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i>处理冲突 (3条)</button>
+                <div class="flex gap-2">
+                    <button onclick="closeModal('offlineSyncModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fas fa-sync-alt mr-1"></i>立即同步全部</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 同步冲突处理弹窗 -->
+    <div class="modal" id="syncConflictModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-lg"><i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>同步冲突处理</h3>
+                    <p class="text-sm text-gray-500 mt-1">以下数据在PDA离线期间与服务器数据存在冲突，请逐条确认处理方式</p>
+                </div>
+                <button onclick="closeModal('syncConflictModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <button class="px-3 py-1.5 text-sm bg-amber-500 text-white rounded-lg">待处理(3)</button>
+                    <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">已处理(0)</button>
+                    <div class="flex-1"></div>
+                    <button class="px-3 py-1.5 text-sm border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50"><i class="fas fa-check-double mr-1"></i>全部采用PDA数据</button>
+                </div>
+
+                <!-- 冲突条目1 -->
+                <div class="border border-gray-200 rounded-lg mb-3 conflict-row">
+                    <div class="p-3 bg-amber-50 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">冲突 #1</span>
+                                <span class="text-sm font-medium">人员: 张三 (2024001)</span>
+                                <span class="text-xs text-gray-500">1-1监区 / 101-02</span>
+                            </div>
+                            <span class="text-xs text-gray-400">PDA-003 | 2026-03-26 06:50</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-mobile-alt text-blue-500"></i>
+                                    <span class="text-sm font-medium text-blue-700">PDA离线记录</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-green-600 font-medium">已点</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span>06:50:23</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span>人脸识别</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">识别置信度:</span><span>96.8%</span></div>
+                                </div>
+                            </div>
+                            <div class="border border-red-200 rounded-lg p-3 bg-red-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-server text-red-500"></i>
+                                    <span class="text-sm font-medium text-red-700">服务器记录</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-red-600 font-medium">未点</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span class="text-gray-400">-</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span class="text-gray-400">-</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">识别置信度:</span><span class="text-gray-400">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-end gap-2">
+                            <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">忽略PDA数据</button>
+                            <button class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600">采用PDA数据</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 冲突条目2 -->
+                <div class="border border-gray-200 rounded-lg mb-3 conflict-row">
+                    <div class="p-3 bg-amber-50 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">冲突 #2</span>
+                                <span class="text-sm font-medium">人员: 李四 (2024002)</span>
+                                <span class="text-xs text-gray-500">1-1监区 / 101-05</span>
+                            </div>
+                            <span class="text-xs text-gray-400">PDA-003 | 2026-03-26 06:51</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-mobile-alt text-blue-500"></i>
+                                    <span class="text-sm font-medium text-blue-700">PDA离线记录</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-green-600 font-medium">已点</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span>06:51:05</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span>人脸识别</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">识别置信度:</span><span>94.2%</span></div>
+                                </div>
+                            </div>
+                            <div class="border border-red-200 rounded-lg p-3 bg-red-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-server text-red-500"></i>
+                                    <span class="text-sm font-medium text-red-700">服务器记录</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-red-600 font-medium">未点</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span class="text-gray-400">-</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span class="text-gray-400">-</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">识别置信度:</span><span class="text-gray-400">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-end gap-2">
+                            <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">忽略PDA数据</button>
+                            <button class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600">采用PDA数据</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 冲突条目3 -->
+                <div class="border border-gray-200 rounded-lg mb-3 conflict-row">
+                    <div class="p-3 bg-amber-50 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">冲突 #3</span>
+                                <span class="text-sm font-medium">人员: 王五 (2024003)</span>
+                                <span class="text-xs text-gray-500">严管区 / 201-01</span>
+                            </div>
+                            <span class="text-xs text-gray-400">PDA-005 | 2026-03-26 06:55</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-mobile-alt text-blue-500"></i>
+                                    <span class="text-sm font-medium text-blue-700">PDA离线记录</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-yellow-600 font-medium">迟到</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span>06:55:42</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span>刷卡</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">备注:</span><span>身体不适</span></div>
+                                </div>
+                            </div>
+                            <div class="border border-yellow-200 rounded-lg p-3 bg-yellow-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-server text-yellow-500"></i>
+                                    <span class="text-sm font-medium text-yellow-700">服务器记录 (另一PDA)</span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">点名状态:</span><span class="text-green-600 font-medium">已点</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">点名时间:</span><span>06:53:18</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">验证方式:</span><span>人脸识别</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">备注:</span><span>-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-end gap-2">
+                            <button class="px-3 py-1.5 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">忽略PDA数据</button>
+                            <button class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600">采用PDA数据</button>
+                            <button class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600">合并记录</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-between">
+                <span class="text-sm text-gray-500">共 3 条冲突待处理</span>
+                <div class="flex gap-2">
+                    <button onclick="closeModal('syncConflictModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">稍后处理</button>
+                    <button onclick="closeModal('syncConflictModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fas fa-check mr-1"></i>确认处理</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
+        });
+    </script>
+</body>
+</html>

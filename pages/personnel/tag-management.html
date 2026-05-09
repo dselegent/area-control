@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标签管理 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .tag-primary { background: #dbeafe; color: #1e40af; }
+        .tag-success { background: #d1fae5; color: #065f46; }
+        .tag-warning { background: #fef3c7; color: #92400e; }
+        .tag-danger { background: #fee2e2; color: #991b1b; }
+        .tag-info { background: #e0e7ff; color: #3730a3; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .view-list { display: block; }
+        .view-assign { display: none; }
+        .view-assign.active { display: block; }
+        .view-list.hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div><div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div></div></div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700"><div class="flex items-center gap-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600"><div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div><a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a></div></div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span class="text-gray-800">标签管理</span>
+                </div>
+                <div class="flex items-center gap-4"><span class="text-sm text-gray-500" id="currentTime"></span></div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 标签列表视图 -->
+                <div id="viewList" class="view-list">
+                    <!-- 搜索区域 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">标签名称:</span>
+                                <input type="text" placeholder="请输入标签名称" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 w-40">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">关联人数:</span>
+                                <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                    <option value="">全部</option>
+                                    <option>10人以上</option>
+                                    <option>10-100人</option>
+                                    <option>100人以上</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2 ml-auto">
+                                <button class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search mr-1"></i>查询</button>
+                                <button class="px-4 py-1.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-undo mr-1"></i>重置</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                            <h3 class="font-semibold text-gray-800"><i class="fas fa-tags text-blue-500 mr-2"></i>标签列表</h3>
+                            <button onclick="openModal('addTagModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-plus mr-1"></i>新增标签</button>
+                        </div>
+                        <table class="w-full">
+                            <thead><tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">标签名称</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">颜色</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">人员类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">关联人数</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">创建时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">描述</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-success">参与点名</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-green-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs">罪犯</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">3,856</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-01-15</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">参与日常点名的人员</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('参与点名')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-warning">当日不点名</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-yellow-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs">罪犯</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">24</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-01-15</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">当日不参与点名的人员</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('当日不点名')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-danger">重点关注</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-red-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs">警察</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">12</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-01-15</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">需要重点关注的人员</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('重点关注')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-primary">严管对象</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-blue-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs">罪犯</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">8</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">严格管理对象</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('严管对象')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-info">临时就诊</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-purple-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-purple-100 text-purple-600 rounded text-xs">外来人员</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">3</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-02-01</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">临时外出就诊人员</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('临时就诊')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="tag tag-warning">长期不参与点名</span></td>
+                                    <td class="px-4 py-3"><span class="w-4 h-4 rounded-full bg-orange-500 inline-block"></span></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs">罪犯</span></td>
+                                    <td class="px-4 py-3 text-sm font-medium">6</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2024-02-10</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">因伤病等原因长期不参与点名</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-3">
+                                            <button onclick="openModal('editTagModal')" class="text-blue-500 hover:text-blue-700 text-sm"><i class="fas fa-edit mr-1"></i>编辑</button>
+                                            <button onclick="showAssign('长期不参与点名')" class="text-green-500 hover:text-green-700 text-sm"><i class="fas fa-user-plus mr-1"></i>关联人员</button>
+                                            <button class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash mr-1"></i>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 关联人员视图 -->
+                <div id="viewAssign" class="view-assign">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800"><i class="fas fa-user-plus text-green-500 mr-2"></i>关联人员 — <span id="assignTagName" class="text-blue-600">参与点名</span></h3>
+                        <button onclick="showList()" class="px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-arrow-left mr-1"></i>返回列表</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- 左侧：选择人员 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                            <h4 class="font-medium text-gray-700 mb-3">选择人员</h4>
+                            <div class="flex gap-2 mb-3">
+                                <input type="text" placeholder="搜索姓名或编号" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>全部监区</option><option>1-1监区</option><option>1-2监区</option><option>2-1监区</option></select>
+                                <button class="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search"></i></button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="rounded"> 全选</label>
+                                    <span class="text-xs text-gray-400">已选 0 人</span>
+                                </div>
+                                <div class="max-h-72 overflow-y-auto">
+                                    <label class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 border-b border-gray-50 cursor-pointer"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=x1" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">张三</p><p class="text-xs text-gray-400">2024001</p></div></label>
+                                    <label class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 border-b border-gray-50 cursor-pointer"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=x2" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">李四</p><p class="text-xs text-gray-400">2024002</p></div></label>
+                                    <label class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 border-b border-gray-50 cursor-pointer"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=x3" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">赵五</p><p class="text-xs text-gray-400">2024003</p></div></label>
+                                    <label class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 cursor-pointer"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=x4" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">钱六</p><p class="text-xs text-gray-400">2024004</p></div></label>
+                                </div>
+                            </div>
+                            <button class="w-full mt-3 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600"><i class="fas fa-plus mr-1"></i>添加到标签</button>
+                        </div>
+                        <!-- 右侧：已关联人员 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-gray-700">已关联人员 <span class="text-sm text-gray-400 font-normal">(3,856人)</span></h4>
+                                <button class="px-3 py-1.5 border border-red-200 text-red-500 rounded-lg text-xs hover:bg-red-50"><i class="fas fa-times mr-1"></i>批量移除</button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="rounded"> 全选</label>
+                                    <span class="text-xs text-gray-400">已选 0 人</span>
+                                </div>
+                                <div class="max-h-72 overflow-y-auto">
+                                    <div class="flex items-center gap-3 px-3 py-2 hover:bg-red-50 border-b border-gray-50"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=y1" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">王警官</p><p class="text-xs text-gray-400">P2024001</p></div><button class="text-red-400 hover:text-red-600 text-xs"><i class="fas fa-times"></i></button></div>
+                                    <div class="flex items-center gap-3 px-3 py-2 hover:bg-red-50 border-b border-gray-50"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=y2" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">张三</p><p class="text-xs text-gray-400">2024001</p></div><button class="text-red-400 hover:text-red-600 text-xs"><i class="fas fa-times"></i></button></div>
+                                    <div class="flex items-center gap-3 px-3 py-2 hover:bg-red-50 border-b border-gray-50"><input type="checkbox" class="rounded"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=y3" class="w-7 h-7 rounded bg-gray-100"><div class="flex-1 min-w-0"><p class="text-sm truncate">李四</p><p class="text-xs text-gray-400">2024002</p></div><button class="text-red-400 hover:text-red-600 text-xs"><i class="fas fa-times"></i></button></div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between"><span class="text-xs text-gray-400">显示 1-3 / 共 3,856 条</span><div class="flex gap-1"><button class="px-2 py-1 border border-gray-200 rounded text-xs text-gray-400" disabled>&lt;</button><button class="px-2 py-1 bg-blue-500 text-white rounded text-xs">1</button><button class="px-2 py-1 border border-gray-200 rounded text-xs">&gt;</button></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增标签弹窗 -->
+    <div class="modal" id="addTagModal">
+        <div class="bg-white rounded-xl shadow-xl w-[450px]">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between"><h3 class="font-semibold text-gray-800"><i class="fas fa-plus text-blue-500 mr-2"></i>新增标签</h3><button onclick="closeModal('addTagModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+            <div class="p-5 space-y-3">
+                <div><label class="block text-sm text-gray-600 mb-1">标签名称 <span class="text-red-500">*</span></label><input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="请输入标签名称"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-sm text-gray-600 mb-1">标签颜色 <span class="text-red-500">*</span></label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option value="green">绿色</option><option value="blue">蓝色</option><option value="yellow">黄色</option><option value="red">红色</option><option value="purple">紫色</option></select></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">人员类型 <span class="text-red-500">*</span></label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option value="">请选择</option><option>警察</option><option>罪犯</option><option>外来人员</option></select></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">描述</label><textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows="2" placeholder="标签用途说明"></textarea></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2"><button onclick="closeModal('addTagModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button><button onclick="closeModal('addTagModal')" class="px-6 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存</button></div>
+        </div>
+    </div>
+
+    <!-- 编辑标签弹窗 -->
+    <div class="modal" id="editTagModal">
+        <div class="bg-white rounded-xl shadow-xl w-[450px]">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between"><h3 class="font-semibold text-gray-800"><i class="fas fa-edit text-blue-500 mr-2"></i>编辑标签</h3><button onclick="closeModal('editTagModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+            <div class="p-5 space-y-3">
+                <div><label class="block text-sm text-gray-600 mb-1">标签名称</label><input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="参与点名"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-sm text-gray-600 mb-1">标签颜色</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option value="green" selected>绿色</option><option value="blue">蓝色</option><option value="yellow">黄色</option><option value="red">红色</option><option value="purple">紫色</option></select></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">人员类型</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>警察</option><option selected>罪犯</option><option>外来人员</option></select></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">描述</label><textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows="2">参与日常点名的人员</textarea></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2"><button onclick="closeModal('editTagModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button><button onclick="closeModal('editTagModal')" class="px-6 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存</button></div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime(){document.getElementById('currentTime').textContent=new Date().toLocaleString('zh-CN');}updateTime();setInterval(updateTime,1000);
+        function openModal(id){document.getElementById(id).classList.add('active');}
+        function closeModal(id){document.getElementById(id).classList.remove('active');}
+        function showAssign(name){
+            document.getElementById('viewList').classList.add('hidden');
+            document.getElementById('viewAssign').classList.add('active');
+            document.getElementById('assignTagName').textContent=name;
+        }
+        function showList(){
+            document.getElementById('viewList').classList.remove('hidden');
+            document.getElementById('viewAssign').classList.remove('active');
+        }
+        document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);}));
+    </script>
+</body>
+</html>

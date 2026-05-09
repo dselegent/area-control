@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人风险评估详情 - 心理感知预警系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .risk-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-extreme { background: #dc2626; color: white; }
+        .badge-high { background: #ea580c; color: white; }
+        .badge-medium { background: #eab308; color: white; }
+        .badge-low { background: #22c55e; color: white; }
+        .factor-bar { height: 10px; border-radius: 5px; background: #e5e7eb; overflow: hidden; }
+        .factor-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+        .factor-card { transition: all 0.3s ease; }
+        .factor-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .time-btn { transition: all 0.2s ease; }
+        .time-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div><div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div></div></div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700"><div class="flex items-center gap-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600"><div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div><a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a></div></div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>心理感知预警</span><span class="text-gray-400">/</span><a href="dashboard.html" class="text-blue-500 hover:underline">风险看板</a><span class="text-gray-400">/</span><span class="text-gray-800">个人风险评估详情</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="dashboard.html" class="px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-arrow-left mr-1"></i>返回</a>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 人员基本信息 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4">
+                    <div class="flex items-center gap-5">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p1" class="w-20 h-20 rounded-xl bg-gray-100 border-2 border-gray-200">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h2 class="text-xl font-bold text-gray-800">张三</h2>
+                                <span class="risk-badge badge-extreme">极高风险</span>
+                                <span class="px-2 py-0.5 bg-red-50 text-red-600 rounded text-xs border border-red-200">待复核</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-x-6 gap-y-1 text-sm">
+                                <p><span class="text-gray-500">囚号：</span><span class="font-medium">2024001</span></p>
+                                <p><span class="text-gray-500">监区：</span><span class="font-medium">三监区</span></p>
+                                <p><span class="text-gray-500">年龄：</span><span class="font-medium">35岁</span></p>
+                                <p><span class="text-gray-500">刑期：</span><span class="font-medium">2020.03 - 2030.03</span></p>
+                                <p><span class="text-gray-500">罪名：</span><span class="font-medium">故意伤害罪</span></p>
+                                <p><span class="text-gray-500">入监日期：</span><span class="font-medium">2020-03-15</span></p>
+                                <p><span class="text-gray-500">责任民警：</span><span class="font-medium">王警官</span></p>
+                                <p><span class="text-gray-500">连续高风天数：</span><span class="text-red-600 font-bold">5天</span></p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">综合风险评分</p>
+                            <p class="text-5xl font-bold text-red-600">92.5</p>
+                            <p class="text-xs text-gray-400 mt-1">评估时间：2026-04-28 09:30</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <!-- 七维雷达图 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-chart-area text-purple-500 mr-2"></i>七维风险因子雷达图</h3>
+                        <div style="height: 280px;"><canvas id="radarChart"></canvas></div>
+                    </div>
+
+                    <!-- 七大因子评分明细 -->
+                    <div class="col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-sliders-h text-blue-500 mr-2"></i>风险因子评分明细</h3>
+                        <div class="space-y-3">
+                            <div class="factor-card bg-red-50 rounded-lg p-3 border border-red-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600"><i class="fas fa-face-frown"></i></span><span class="font-medium text-gray-800">情绪状态</span><span class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded">权重 30%</span></div>
+                                    <span class="text-xl font-bold text-red-600">95.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-red-500" style="width:95%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">微表情分析：悲伤指数82.3、恐惧指数71.5，主导情绪为悲伤，情绪强度高</p>
+                            </div>
+                            <div class="factor-card bg-orange-50 rounded-lg p-3 border border-orange-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600"><i class="fas fa-phone-slash"></i></span><span class="font-medium text-gray-800">社会关系</span><span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-600 rounded">权重 15%</span></div>
+                                    <span class="text-xl font-bold text-orange-600">88.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-orange-500" style="width:88%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">近30天会见0次（正常月均2次），通话1次（正常月均8次），频次骤降90%</p>
+                            </div>
+                            <div class="factor-card bg-yellow-50 rounded-lg p-3 border border-yellow-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-arrow-trend-down"></i></span><span class="font-medium text-gray-800">改造表现</span><span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-600 rounded">权重 15%</span></div>
+                                    <span class="text-xl font-bold text-yellow-600">85.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-yellow-500" style="width:85%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">近30天积分下降42分，2次消极怠工记录，1次违规记录</p>
+                            </div>
+                            <div class="factor-card bg-blue-50 rounded-lg p-3 border border-blue-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-gavel"></i></span><span class="font-medium text-gray-800">刑期压力</span><span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded">权重 10%</span></div>
+                                    <span class="text-xl font-bold text-blue-600">90.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-blue-500" style="width:90%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">余刑4年，最近一次减刑申请被驳回，减刑受阻</p>
+                            </div>
+                            <div class="factor-card bg-purple-50 rounded-lg p-3 border border-purple-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-house-crack"></i></span><span class="font-medium text-gray-800">家庭变故</span><span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded">权重 10%</span></div>
+                                    <span class="text-xl font-bold text-purple-600">92.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-purple-500" style="width:92%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">配偶提出离婚申请（本月），父亲重病住院（上月）</p>
+                            </div>
+                            <div class="factor-card bg-cyan-50 rounded-lg p-3 border border-cyan-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600"><i class="fas fa-heart-pulse"></i></span><span class="font-medium text-gray-800">健康状况</span><span class="text-xs px-2 py-0.5 bg-cyan-100 text-cyan-600 rounded">权重 10%</span></div>
+                                    <span class="text-xl font-bold text-cyan-600">70.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-cyan-500" style="width:70%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">有心理障碍史（2023年诊断轻度抑郁症），长期失眠</p>
+                            </div>
+                            <div class="factor-card bg-emerald-50 rounded-lg p-3 border border-emerald-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="fas fa-exclamation-circle"></i></span><span class="font-medium text-gray-800">近期事件</span><span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded">权重 10%</span></div>
+                                    <span class="text-xl font-bold text-emerald-600">80.0</span>
+                                </div>
+                                <div class="factor-bar"><div class="factor-fill bg-emerald-500" style="width:80%"></div></div>
+                                <p class="text-xs text-gray-500 mt-1">本周与同监室人员发生冲突1次，受到警告处分</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史趋势 + 风险评级记录 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-gray-800"><i class="fas fa-chart-line text-purple-500 mr-2"></i>风险评分历史趋势</h3>
+                            <div class="flex gap-1">
+                                <button class="time-btn active px-3 py-1 text-xs border border-gray-200 rounded-lg" onclick="switchTrend(7, this)">7天</button>
+                                <button class="time-btn px-3 py-1 text-xs border border-gray-200 rounded-lg" onclick="switchTrend(30, this)">30天</button>
+                                <button class="time-btn px-3 py-1 text-xs border border-gray-200 rounded-lg" onclick="switchTrend(90, this)">90天</button>
+                            </div>
+                        </div>
+                        <div style="height: 260px;"><canvas id="trendChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-history text-blue-500 mr-2"></i>风险评级历史记录</h3>
+                        <div class="overflow-y-auto" style="height: 280px;">
+                            <table class="w-full text-sm">
+                                <thead class="sticky top-0 bg-white"><tr class="border-b border-gray-100"><th class="py-2 text-left text-gray-600 font-medium">日期</th><th class="py-2 text-left text-gray-600 font-medium">评分</th><th class="py-2 text-left text-gray-600 font-medium">等级</th><th class="py-2 text-left text-gray-600 font-medium">状态</th><th class="py-2 text-left text-gray-600 font-medium">复核人</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-28</td><td class="font-bold text-red-600">92.5</td><td><span class="risk-badge badge-extreme text-xs">极高</span></td><td><span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">待复核</span></td><td class="text-gray-400">-</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-27</td><td class="font-bold text-red-600">89.2</td><td><span class="risk-badge badge-extreme text-xs">极高</span></td><td><span class="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded">已复核</span></td><td>李科长</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-26</td><td class="font-bold text-orange-600">82.1</td><td><span class="risk-badge badge-high text-xs">高</span></td><td><span class="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded">已复核</span></td><td>李科长</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-25</td><td class="font-bold text-orange-600">78.5</td><td><span class="risk-badge badge-high text-xs">高</span></td><td><span class="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded">已复核</span></td><td>王主任</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-24</td><td class="font-bold text-yellow-600">65.3</td><td><span class="risk-badge badge-medium text-xs">中</span></td><td><span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">已归档</span></td><td>王主任</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-23</td><td class="font-bold text-yellow-600">62.0</td><td><span class="risk-badge badge-medium text-xs">中</span></td><td><span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">已归档</span></td><td>王主任</td></tr>
+                                    <tr class="border-b border-gray-50"><td class="py-2">04-22</td><td class="font-bold text-green-600">45.8</td><td><span class="risk-badge badge-low text-xs">低</span></td><td><span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">已归档</span></td><td>李科长</td></tr>
+                                    <tr><td class="py-2">04-21</td><td class="font-bold text-green-600">42.1</td><td><span class="risk-badge badge-low text-xs">低</span></td><td><span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">已归档</span></td><td>李科长</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 七维雷达图
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['情绪状态', '社会关系', '改造表现', '刑期压力', '家庭变故', '健康状况', '近期事件'],
+                datasets: [{
+                    label: '风险评分',
+                    data: [95, 88, 85, 90, 92, 70, 80],
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#ef4444',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 10 } }, pointLabels: { font: { size: 11 } } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 趋势图数据
+        const trendData = {
+            7: { labels: ['04-22','04-23','04-24','04-25','04-26','04-27','04-28'], data: [45.8,62,65.3,78.5,82.1,89.2,92.5] },
+            30: { labels: Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}), data: [35,38,40,42,45,48,50,52,55,58,60,62,65,68,70,72,75,78,80,82,85,88,90,92,95,92,89,88,90,92.5] },
+            90: { labels: ['1月','2月','3月','4月'], data: [32,45,65,92.5] }
+        };
+        let trendChart = new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: { labels: trendData[7].labels, datasets: [{ label: '风险评分', data: trendData[7].data, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.4 }, { label: '高风险线', data: Array(7).fill(70), borderColor: '#f97316', borderDash: [5,5], pointRadius: 0, fill: false }, { label: '极高风险线', data: Array(7).fill(85), borderColor: '#dc2626', borderDash: [5,5], pointRadius: 0, fill: false }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }, scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+
+        function switchTrend(days, btn) {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const d = trendData[days];
+            trendChart.data.labels = d.labels;
+            trendChart.data.datasets[0].data = d.data;
+            trendChart.data.datasets[1].data = Array(d.data.length).fill(70);
+            trendChart.data.datasets[2].data = Array(d.data.length).fill(85);
+            trendChart.update();
+        }
+    </script>
+</body>
+</html>

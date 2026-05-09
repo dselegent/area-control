@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人员库管理 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+        .sidebar {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-right: 3px solid #3b82f6;
+        }
+        .nav-item.active { color: #3b82f6; }
+
+        .tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .tag-primary { background: #dbeafe; color: #1e40af; }
+        .tag-success { background: #d1fae5; color: #065f46; }
+        .tag-warning { background: #fef3c7; color: #92400e; }
+        .tag-danger { background: #fee2e2; color: #991b1b; }
+        .tag-info { background: #e0e7ff; color: #3730a3; }
+
+        .type-tab { padding: 8px 16px; border-bottom: 2px solid transparent; transition: all 0.3s; cursor: pointer; }
+        .type-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; background: transparent; font-weight: 500; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm">AI区域管控系统</h1>
+                        <p class="text-xs text-gray-400">湖南省监狱</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">系统管理员</p>
+                        <p class="text-xs text-gray-400">admin</p>
+                    </div>
+                    <a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i>
+                    <span class="text-gray-400">/</span>
+                    <span>人员库管理</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-gray-800">人员列表</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 人员类型Tab -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
+                    <div class="flex border-b border-gray-100 px-4">
+                        <button class="type-tab active text-sm font-medium" onclick="switchType('all', this)">全部 <span class="ml-1 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">558</span></button>
+                        <button class="type-tab text-sm font-medium text-gray-600" onclick="switchType('police', this)">警察 <span class="ml-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">86</span></button>
+                        <button class="type-tab text-sm font-medium text-gray-600" onclick="switchType('prisoner', this)">罪犯 <span class="ml-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">432</span></button>
+                        <button class="type-tab text-sm font-medium text-gray-600" onclick="switchType('visitor', this)">外来人员 <span class="ml-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">40</span></button>
+                    </div>
+                    <!-- 搜索区域 -->
+                    <div class="p-4">
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">姓名:</span>
+                                <input type="text" placeholder="请输入姓名" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 w-32">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">编号:</span>
+                                <input type="text" placeholder="请输入编号" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 w-32">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">标签:</span>
+                                <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                    <option value="">全部</option>
+                                    <option value="call">参与点名</option>
+                                    <option value="nocall">不参与点名</option>
+                                    <option value="focus">重点关注</option>
+                                    <option value="strict">严管对象</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">所属部门:</span>
+                                <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                    <option value="">全部</option>
+                                    <option>1-1监区</option>
+                                    <option>1-2监区</option>
+                                    <option>2-1监区</option>
+                                    <option>2-2监区</option>
+                                    <option>指挥中心</option>
+                                    <option>狱政科</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">特殊属性:</span>
+                                <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                    <option value="">全部</option>
+                                    <option>禁闭状态</option>
+                                    <option>严管对象</option>
+                                    <option>临时就诊</option>
+                                    <option>集训</option>
+                                    <option>住院</option>
+                                    <option>外出就医</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">状态:</span>
+                                <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                    <option value="">全部</option>
+                                    <option>在押</option>
+                                    <option>外出</option>
+                                    <option>住院</option>
+                                    <option>注销</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2 ml-auto">
+                                <button class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search mr-1"></i>查询</button>
+                                <button class="px-4 py-1.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-undo mr-1"></i>重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <button onclick="openModal('addModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1">
+                                <i class="fas fa-plus"></i>新增人员
+                            </button>
+                            <button class="px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm hover:bg-red-50 flex items-center gap-1">
+                                <i class="fas fa-trash"></i>批量删除
+                            </button>
+                            <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1">
+                                <i class="fas fa-download"></i>导出
+                            </button>
+                            <button onclick="openModal('importModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1">
+                                <i class="fas fa-upload"></i>导入
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <span id="typeCount">共 558 条记录</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left"><input type="checkbox" class="rounded"></th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">编号</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">姓名</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">照片</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">人员类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">所属部门</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">标签</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">特殊属性</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2024001</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">张三</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=zs" class="w-10 h-10 rounded bg-gray-100">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><span class="tag tag-primary">罪犯</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区</td>
+                                <td class="px-4 py-3">
+                                    <span class="tag tag-success">参与点名</span>
+                                </td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3"><span class="tag tag-success">正常</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2024002</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">李四</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=ls" class="w-10 h-10 rounded bg-gray-100">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><span class="tag tag-primary">罪犯</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-2监区</td>
+                                <td class="px-4 py-3">
+                                    <span class="tag tag-success">参与点名</span>
+                                    <span class="tag tag-danger">重点关注</span>
+                                </td>
+                                <td class="px-4 py-3"><span class="tag tag-warning">严管对象</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-success">正常</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">P2024001</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">王警官</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=wgj" class="w-10 h-10 rounded bg-gray-100">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><span class="tag tag-info">警察</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">1-1监区</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3"><span class="tag tag-success">正常</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2024003</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">赵五</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=zw" class="w-10 h-10 rounded bg-gray-100">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><span class="tag tag-primary">罪犯</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2-1监区</td>
+                                <td class="px-4 py-3">
+                                    <span class="tag tag-warning">当日不点名</span>
+                                </td>
+                                <td class="px-4 py-3"><span class="tag tag-info">临时就诊</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-success">正常</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button onclick="openModal('editModal')" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2024004</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">钱六</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=ql" class="w-10 h-10 rounded bg-gray-100">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><span class="tag tag-primary">罪犯</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">严管区</td>
+                                <td class="px-4 py-3">
+                                    <span class="tag tag-success">参与点名</span>
+                                    <span class="tag tag-danger">重点关注</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="tag tag-warning">禁闭</span>
+                                    <span class="tag tag-danger">严管对象</span>
+                                </td>
+                                <td class="px-4 py-3"><span class="tag tag-success">正常</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button onclick="openModal('editModal')" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-500 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm text-gray-400">2024005</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-500">孙七</td>
+                                <td class="px-4 py-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=sq" class="w-10 h-10 rounded bg-gray-100 opacity-50">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-400"><span class="tag" style="background:#f3f4f6;color:#9ca3af;">罪犯</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-400">2-1监区</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3"><span class="tag" style="background:#fef3c7;color:#92400e;">注销</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <a href="detail.html" class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></a>
+                                        <button class="text-gray-400 cursor-not-allowed text-sm" title="已注销人员不可编辑"><i class="fas fa-edit"></i></button>
+                                        <button class="text-gray-400 cursor-not-allowed text-sm" title="已注销人员不可删除"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 分页 -->
+                    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-sm text-gray-500">共 558 条记录</span>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">上一页</button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                            <span class="text-gray-400">...</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">56</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增人员弹窗 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">新增人员</h3>
+                <button onclick="closeModal('addModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <form class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">人员编号 *</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请输入人员编号">
+                            <p class="text-xs text-gray-400 mt-1">编号全系统唯一，不可重复</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请输入姓名">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">人员类型 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option value="">请选择</option>
+                                <option>警察</option>
+                                <option>罪犯</option>
+                                <option>外来人员</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">性别 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option value="">请选择</option>
+                                <option>男</option>
+                                <option>女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">出生日期</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">身份证号</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请输入18位身份证号">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">所属部门 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option value="">请选择</option>
+                                <option>1-1监区</option>
+                                <option>1-2监区</option>
+                                <option>2-1监区</option>
+                                <option>指挥中心</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请输入联系电话">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">照片</label>
+                        <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-2"></i>
+                            <p class="text-sm text-gray-500">点击上传或拖拽文件到此处</p>
+                            <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式，最大 2MB</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">参与点名</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">长期不参与点名</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">重点关注</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">严管对象</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" rows="2" placeholder="请输入备注信息"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('addModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('addModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑人员弹窗 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">编辑人员</h3>
+                <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <form class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">人员编号 *</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 bg-gray-50" value="2024001" readonly>
+                            <p class="text-xs text-gray-400 mt-1">编号不可修改</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" value="张三">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">人员类型 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option>警察</option>
+                                <option selected>罪犯</option>
+                                <option>外来人员</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">性别 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option selected>男</option>
+                                <option>女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">出生日期</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" value="1998-05-12">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">身份证号</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" value="43010219980512****">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">所属部门 *</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500">
+                                <option selected>1-1监区</option>
+                                <option>1-2监区</option>
+                                <option>2-1监区</option>
+                                <option>指挥中心</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" value="138****6789">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">照片</label>
+                        <div class="flex items-center gap-4">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=zs" class="w-16 h-16 rounded-lg bg-gray-100">
+                            <div class="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center flex-1">
+                                <p class="text-sm text-gray-500">点击更换照片</p>
+                                <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式，最大 2MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox" checked><span class="text-sm">参与点名</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">长期不参与点名</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">重点关注</span></label>
+                            <label class="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded cursor-pointer hover:bg-gray-50"><input type="checkbox"><span class="text-sm">严管对象</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('editModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button class="px-4 py-2 border border-orange-200 text-orange-500 rounded-lg hover:bg-orange-50 mr-auto"><i class="fas fa-user-slash mr-1"></i>注销此人</button>
+                <button onclick="closeModal('editModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入弹窗 -->
+    <div class="modal" id="importModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg"><i class="fas fa-upload text-blue-500 mr-2"></i>人员数据导入</h3>
+                <button onclick="closeModal('importModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-5">
+                <!-- 步骤1：下载模板 -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">1</div>
+                        <h4 class="font-medium text-gray-800">下载导入模板</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">请先下载标准模板，按照模板格式填写数据后导入。模板包含必填字段说明和示例数据。</p>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-file-excel mr-1"></i>下载Excel模板</button>
+                        <button class="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg text-sm hover:bg-blue-100"><i class="fas fa-file-csv mr-1"></i>下载CSV模板</button>
+                    </div>
+                </div>
+                <!-- 步骤2：上传文件 -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold">2</div>
+                        <h4 class="font-medium text-gray-800">上传数据文件</h4>
+                    </div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-sm text-gray-600">点击选择文件或拖拽到此处</p>
+                        <p class="text-xs text-gray-400 mt-1">支持 .xlsx、.xls、.csv 格式，最大 10MB</p>
+                    </div>
+                </div>
+                <!-- 导入设置 -->
+                <div class="space-y-3">
+                    <h4 class="font-medium text-gray-700 text-sm">导入设置</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">人员类型</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>罪犯</option><option>警察</option><option>外来人员</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">默认标签</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>不设置</option><option>参与点名</option><option>重点关注</option></select>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" class="rounded" checked> 编号重复时自动跳过</label>
+                    <label class="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" class="rounded"> 导入完成后自动关联人脸照片</label>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-700">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>导入前请确认数据格式正确。导入后可在"导入记录"中查看结果和错误日志。
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('importModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('importModal')" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fas fa-upload mr-1"></i>开始导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // 人员类型切换
+        const typeCounts = { all: 558, police: 86, prisoner: 432, visitor: 40 };
+        function switchType(type, btn) {
+            document.querySelectorAll('.type-tab').forEach(t => {
+                t.classList.remove('active');
+                t.classList.add('text-gray-600');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-600');
+            document.getElementById('typeCount').textContent = '共 ' + typeCounts[type] + ' 条记录';
+        }
+
+        // 点击模态框背景关闭
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeModal(this.id);
+            });
+        });
+    </script>
+</body>
+</html>

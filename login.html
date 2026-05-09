@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tech-grid {
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+        }
+
+        .input-field {
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
+            75% { transform: translate(20px, 30px) rotate(270deg); }
+        }
+
+        .logo-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .security-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center relative overflow-hidden">
+    <!-- 背景装饰 -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- 网格背景 -->
+    <div class="absolute inset-0 tech-grid opacity-30"></div>
+
+    <!-- 登录容器 -->
+    <div class="login-container glow-effect rounded-2xl shadow-2xl w-full max-w-md p-8 relative z-10 mx-4">
+        <!-- 头部 -->
+        <div class="text-center mb-8">
+            <div class="logo-pulse inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 mb-4 shadow-lg">
+                <i class="fas fa-shield-alt text-2xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">湖南省监狱</h1>
+            <h2 class="text-lg font-semibold text-blue-600">AI区域管控系统</h2>
+            <p class="text-sm text-gray-500 mt-2">Prison AI Zone Control System</p>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm" class="space-y-5">
+            <!-- 用户名 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user text-gray-400 mr-2"></i>用户名
+                </label>
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="username"
+                        class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-700"
+                        placeholder="请输入用户名"
+                        value="admin"
+                    >
+                </div>
+            </div>
+
+            <!-- 密码 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock text-gray-400 mr-2"></i>密码
+                </label>
+                <div class="relative">
+                    <input
+                        type="password"
+                        id="password"
+                        class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-700"
+                        placeholder="请输入密码"
+                        value="********"
+                    >
+                    <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 验证码 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-shield-alt text-gray-400 mr-2"></i>验证码
+                </label>
+                <div class="flex gap-3">
+                    <input
+                        type="text"
+                        id="captcha"
+                        class="input-field flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-700"
+                        placeholder="请输入验证码"
+                        maxlength="4"
+                    >
+                    <div class="captcha-image w-28 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity" onclick="refreshCaptcha()">
+                        <span class="text-white font-bold text-lg tracking-wider" style="font-family: monospace;">A7K9</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 记住我 & 忘记密码 -->
+            <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <span class="ml-2 text-gray-600">记住我</span>
+                </label>
+                <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">忘记密码？</a>
+            </div>
+
+            <!-- 登录按钮 -->
+            <button
+                type="submit"
+                class="btn-primary w-full py-3 rounded-lg text-white font-semibold text-lg shadow-lg"
+            >
+                <i class="fas fa-sign-in-alt mr-2"></i>登录系统
+            </button>
+        </form>
+
+        <!-- 底部信息 -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="flex items-center justify-center gap-4 text-xs text-gray-500">
+                <span class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                    等保三级认证
+                </span>
+                <span class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                    信创环境支持
+                </span>
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-3">
+                © 2026 湖南省监狱管理局 版权所有
+            </p>
+        </div>
+    </div>
+
+    <!-- 安全提示 -->
+    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+        <div class="security-badge text-white px-4 py-2 rounded-full text-sm shadow-lg flex items-center gap-2">
+            <i class="fas fa-shield-alt"></i>
+            <span>系统已开启安全审计，所有操作将被记录</span>
+        </div>
+    </div>
+
+    <script>
+        // 切换密码可见性
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // 刷新验证码
+        function refreshCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let captcha = '';
+            for (let i = 0; i < 4; i++) {
+                captcha += chars[Math.floor(Math.random() * chars.length)];
+            }
+            document.querySelector('.captcha-image span').textContent = captcha;
+        }
+
+        // 表单提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const captcha = document.getElementById('captcha').value;
+
+            if (!username || !password) {
+                alert('请填写用户名和密码');
+                return;
+            }
+
+            if (!captcha) {
+                alert('请输入验证码');
+                return;
+            }
+
+            // 模拟登录成功，跳转到首页
+            const btn = document.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>登录中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

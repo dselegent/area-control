@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日志审计 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div>
+                    <div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div>
+                </div>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div>
+                    <a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>业务管理</span><span class="text-gray-400">/</span><span class="text-gray-800">日志审计</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">今日操作数</p>
+                                <p class="text-3xl font-bold text-gray-800">1,256</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i class="fas fa-mouse-pointer text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">登录次数</p>
+                                <p class="text-3xl font-bold text-green-600">186</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                                <i class="fas fa-sign-in-alt text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">异常操作</p>
+                                <p class="text-3xl font-bold text-red-600">3</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">导出次数</p>
+                                <p class="text-3xl font-bold text-purple-600">42</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                                <i class="fas fa-file-export text-purple-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索区域 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="grid grid-cols-5 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">开始时间</label>
+                            <input type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">结束时间</label>
+                            <input type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">操作人</label>
+                            <input type="text" placeholder="请输入姓名" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">操作类型</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <option>全部</option>
+                                <option>登录</option>
+                                <option>查询</option>
+                                <option>新增</option>
+                                <option>修改</option>
+                                <option>删除</option>
+                                <option>导出</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"><i class="fas fa-search mr-1"></i>查询</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-1"><i class="fas fa-download"></i>导出日志</button>
+                        <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-1"><i class="fas fa-archive"></i>归档</button>
+                    </div>
+                </div>
+
+                <!-- 日志列表 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作用户</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">IP地址</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作模块</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作内容</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">结果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:30:15</td>
+                                <td class="px-4 py-3 text-sm font-medium">张三</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.105</td>
+                                <td class="px-4 py-3 text-sm">人员库管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs">查询</span></td>
+                                <td class="px-4 py-3 text-sm">查询人员列表</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:28:42</td>
+                                <td class="px-4 py-3 text-sm font-medium">李四</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.112</td>
+                                <td class="px-4 py-3 text-sm">零星流动管控</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs">新增</span></td>
+                                <td class="px-4 py-3 text-sm">发起流动申请: 张XX → 医疗监区</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:25:18</td>
+                                <td class="px-4 py-3 text-sm font-medium">王五</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.98</td>
+                                <td class="px-4 py-3 text-sm">系统管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-yellow-100 text-yellow-600 rounded text-xs">修改</span></td>
+                                <td class="px-4 py-3 text-sm">修改用户密码</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:20:05</td>
+                                <td class="px-4 py-3 text-sm font-medium">赵六</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.120</td>
+                                <td class="px-4 py-3 text-sm">人员点名管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs">新增</span></td>
+                                <td class="px-4 py-3 text-sm">创建点名任务: 午休点名</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:15:33</td>
+                                <td class="px-4 py-3 text-sm font-medium">系统管理员</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.2</td>
+                                <td class="px-4 py-3 text-sm">业务管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-purple-100 text-purple-600 rounded text-xs">导出</span></td>
+                                <td class="px-4 py-3 text-sm">导出设备列表</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:10:28</td>
+                                <td class="px-4 py-3 text-sm font-medium">张三</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.105</td>
+                                <td class="px-4 py-3 text-sm">预警管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs">删除</span></td>
+                                <td class="px-4 py-3 text-sm">删除历史预警记录</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>失败</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:05:12</td>
+                                <td class="px-4 py-3 text-sm font-medium">李四</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.112</td>
+                                <td class="px-4 py-3 text-sm">系统</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">登录</span></td>
+                                <td class="px-4 py-3 text-sm">用户登录系统</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-04-07 10:00:45</td>
+                                <td class="px-4 py-3 text-sm font-medium">王五</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">192.168.1.98</td>
+                                <td class="px-4 py-3 text-sm">人员库管理</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-yellow-100 text-yellow-600 rounded text-xs">修改</span></td>
+                                <td class="px-4 py-3 text-sm">编辑人员信息: ID-2024001</td>
+                                <td class="px-4 py-3 text-sm"><span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>成功</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 分页 -->
+                    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-sm text-gray-500">共 1,256 条记录，第 1/126 页</span>
+                        <div class="flex gap-1">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-400" disabled>上一页</button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                            <span class="px-2 py-1 text-gray-400">...</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">126</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

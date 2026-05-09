@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法模型管理 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .modal { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .model-card { transition: all 0.2s; }
+        .model-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .status-running { background: #dcfce7; color: #16a34a; }
+        .status-stopped { background: #fee2e2; color: #dc2626; }
+        .status-updating { background: #fef3c7; color: #ca8a04; }
+        .gpu-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .gpu-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div><div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div></div></div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">主要功能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-home w-5"></i><span>首页驾驶舱</span></a>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>人员点名管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单/权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700"><div class="flex items-center gap-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600"><div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div><a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a></div></div>
+        </aside>
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600"><i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>智能行为预警</span><span class="text-gray-400">/</span><span class="text-gray-800">算法模型管理</span></div>
+                <div class="flex items-center gap-4"><span class="text-sm text-gray-500" id="currentTime"></span><button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button></div>
+            </header>
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-5 gap-4 mb-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">模型总数</p><p class="text-2xl font-bold text-gray-800 mt-1">8</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">运行中</p><p class="text-2xl font-bold text-green-500 mt-1">6</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">已停止</p><p class="text-2xl font-bold text-red-500 mt-1">1</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">GPU利用率</p><p class="text-2xl font-bold text-blue-500 mt-1">67%</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">今日检测</p><p class="text-2xl font-bold text-purple-500 mt-1">12,456</p></div>
+                </div>
+                <!-- 操作栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <button onclick="showUpload()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-upload mr-1"></i>上传新模型</button>
+                            <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-sync mr-1"></i>刷新状态</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">GPU卡: </span>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"><option>全部</option><option>GPU-0</option><option>GPU-1</option></select>
+                        </div>
+                    </div>
+                </div>
+                <!-- GPU资源监控 -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-microchip text-green-500 mr-2"></i>GPU-0 资源使用</h3>
+                        <div class="space-y-3">
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">GPU利用率</span><span class="font-medium">72%</span></div><div class="gpu-bar"><div class="gpu-fill bg-blue-500" style="width:72%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">显存使用</span><span class="font-medium">14.2 / 24 GB</span></div><div class="gpu-bar"><div class="gpu-fill bg-green-500" style="width:59%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">温度</span><span class="font-medium">65°C</span></div><div class="gpu-bar"><div class="gpu-fill bg-orange-500" style="width:65%"></div></div></div>
+                            <div class="flex justify-between text-sm"><span class="text-gray-600">运行模型</span><span class="font-medium">4个</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3"><i class="fas fa-microchip text-purple-500 mr-2"></i>GPU-1 资源使用</h3>
+                        <div class="space-y-3">
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">GPU利用率</span><span class="font-medium">58%</span></div><div class="gpu-bar"><div class="gpu-fill bg-blue-500" style="width:58%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">显存使用</span><span class="font-medium">10.8 / 24 GB</span></div><div class="gpu-bar"><div class="gpu-fill bg-green-500" style="width:45%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">温度</span><span class="font-medium">58°C</span></div><div class="gpu-bar"><div class="gpu-fill bg-green-500" style="width:58%"></div></div></div>
+                            <div class="flex justify-between text-sm"><span class="text-gray-600">运行模型</span><span class="font-medium">2个</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 模型列表 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-running text-red-500"></i><h4 class="font-semibold text-gray-800">异常攀爬检测</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v2.3.1</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-15</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>3.2 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">2,156</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">3</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">96.2%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-stopwatch text-orange-500"></i><h4 class="font-semibold text-gray-800">长时间静止检测</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v1.8.0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-10</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>2.8 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">1,832</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">1</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">94.5%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-purple-500"></i><h4 class="font-semibold text-gray-800">电子围栏预警</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v3.1.0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-20</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>4.1 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">3,421</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">5</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">97.8%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-users text-blue-500"></i><h4 class="font-semibold text-gray-800">人员聚集检测</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v2.0.5</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-12</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-1</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>3.5 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">2,890</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">2</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">93.1%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-fist-raised text-yellow-500"></i><h4 class="font-semibold text-gray-800">剧烈运动检测</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v1.5.2</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-08</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-1</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>2.6 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">1,567</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">91.7%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-clock text-teal-500"></i><h4 class="font-semibold text-gray-800">长时间逗留检测</h4></div>
+                            <span class="status-running px-2 py-0.5 rounded text-xs font-semibold">运行中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v1.9.3</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-04-18</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>2.1 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">2,345</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日预警</span><span class="text-red-500 font-medium">1</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">95.3%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showConfig()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-cog mr-1"></i>参数配置</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停止</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 opacity-60">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-user-secret text-gray-500"></i><h4 class="font-semibold text-gray-800">人脸识别增强</h4></div>
+                            <span class="status-stopped px-2 py-0.5 rounded text-xs font-semibold">已停止</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v4.2.0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新时间</span><span>2026-03-25</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>0 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">停止原因</span><span class="text-red-500">新版本待部署</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button class="flex-1 px-3 py-1.5 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100"><i class="fas fa-play mr-1"></i>启动</button>
+                            <button class="flex-1 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100"><i class="fas fa-history mr-1"></i>版本管理</button>
+                        </div>
+                    </div>
+                    <div class="model-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><i class="fas fa-smile text-pink-500"></i><h4 class="font-semibold text-gray-800">微表情识别</h4></div>
+                            <span class="status-updating px-2 py-0.5 rounded text-xs font-semibold">更新中</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-500">版本</span><span class="font-medium">v2.1.0 → v2.2.0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">更新进度</span><span class="text-yellow-600">68%</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">GPU分配</span><span>GPU-0</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">显存占用</span><span>2.0 GB</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">今日检测</span><span class="text-blue-500 font-medium">890</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">准确率</span><span class="text-green-600 font-medium">88.6%</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button class="flex-1 px-3 py-1.5 bg-gray-100 text-gray-400 rounded text-xs cursor-not-allowed"><i class="fas fa-spinner fa-spin mr-1"></i>更新中...</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 参数配置弹窗 -->
+    <div class="modal" id="configModal">
+        <div class="bg-white rounded-xl shadow-xl w-[550px] max-h-[80vh] overflow-y-auto">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800"><i class="fas fa-cog text-blue-500 mr-2"></i>模型参数配置</h3>
+                <button onclick="closeConfig()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="bg-blue-50 rounded-lg p-3"><p class="text-sm font-medium text-blue-800">异常攀爬检测 v2.3.1</p></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-sm text-gray-600 mb-1">检测置信度阈值</label><input type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="0.75" step="0.05" min="0" max="1"></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">检测帧率 (fps)</label><input type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="15" min="5" max="30"></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">最小检测区域 (px)</label><input type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="50" min="20" max="200"></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">连续帧确认数</label><input type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="5" min="1" max="20"></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">检测区域</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>全部区域</option><option>围墙区域</option><option>AB门区域</option><option>自定义区域</option></select></div>
+                <div><label class="block text-sm text-gray-600 mb-1">预警推送方式</label><div class="flex gap-2 mt-1"><label class="flex items-center gap-1 text-sm"><input type="checkbox" checked class="rounded"> 系统弹窗</label><label class="flex items-center gap-1 text-sm"><input type="checkbox" checked class="rounded"> 声音提醒</label><label class="flex items-center gap-1 text-sm"><input type="checkbox" class="rounded"> 短信通知</label></div></div>
+                <div><label class="block text-sm text-gray-600 mb-1">备注</label><textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows="2" placeholder="配置说明..."></textarea></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeConfig()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button>
+                <button onclick="closeConfig()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传模型弹窗 -->
+    <div class="modal" id="uploadModal">
+        <div class="bg-white rounded-xl shadow-xl w-[500px]">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800"><i class="fas fa-upload text-blue-500 mr-2"></i>上传新模型</h3>
+                <button onclick="closeUpload()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div><label class="block text-sm text-gray-600 mb-1">模型名称</label><input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="输入模型名称"></div>
+                <div><label class="block text-sm text-gray-600 mb-1">模型类型</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>行为检测</option><option>人脸识别</option><option>物体检测</option><option>其他</option></select></div>
+                <div><label class="block text-sm text-gray-600 mb-1">模型文件</label><div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-500 cursor-pointer"><i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-2"></i><p class="text-sm text-gray-500">点击或拖拽上传模型文件</p><p class="text-xs text-gray-400">支持 .onnx / .pt / .tensorrt 格式</p></div></div>
+                <div><label class="block text-sm text-gray-600 mb-1">目标GPU</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>GPU-0</option><option>GPU-1</option><option>自动分配</option></select></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeUpload()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button>
+                <button onclick="closeUpload()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">开始上传</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime(){const n=new Date();document.getElementById('currentTime').textContent=n.toLocaleString('zh-CN');}updateTime();setInterval(updateTime,1000);
+        function showConfig(){document.getElementById('configModal').classList.add('active');}
+        function closeConfig(){document.getElementById('configModal').classList.remove('active');}
+        function showUpload(){document.getElementById('uploadModal').classList.add('active');}
+        function closeUpload(){document.getElementById('uploadModal').classList.remove('active');}
+        document.getElementById('configModal').addEventListener('click',function(e){if(e.target===this)closeConfig();});
+        document.getElementById('uploadModal').addEventListener('click',function(e){if(e.target===this)closeUpload();});
+    </script>
+</body>
+</html>
