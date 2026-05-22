@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-right: 3px solid #3b82f6;
+        }
+
+        .nav-item.active {
+            color: #3b82f6;
+        }
+
+        /* 统计卡片动画 */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            animation: countUp 1s ease-out;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 3D模型占位区域 */
+        .map-3d-placeholder {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-3d-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 30% 70%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+        }
+
+        /* 3D网格背景 */
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            perspective: 500px;
+            transform: rotateX(60deg);
+            transform-origin: center bottom;
+        }
+
+        /* 建筑楼层区块 */
+        .building-block {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.3));
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .building-block:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.5));
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .building-block.warning {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.6), rgba(239, 68, 68, 0.3));
+            border-color: rgba(239, 68, 68, 0.5);
+            animation: pulse-warning 2s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+        }
+
+        /* 流动人员标记 */
+        .person-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            animation: person-pulse 1.5s infinite;
+        }
+
+        @keyframes person-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* 实时数据更新动画 */
+        .data-refreshing {
+            animation: data-flash 0.5s ease;
+        }
+
+        @keyframes data-flash {
+            0% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: transparent; }
+        }
+
+        /* 预警推送动画 */
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 16px 20px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            max-width: 360px;
+        }
+
+        .alert-toast.show {
+            transform: translateX(0);
+        }
+
+        .alert-toast.warning {
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-toast.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* 设备状态指示灯 */
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .status-warning { background: #eab308; box-shadow: 0 0 6px #eab308; }
+        .status-offline { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+        /* 楼层标签 */
+        .floor-tag {
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* 预警颜色 */
+        .alert-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .alert-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .alert-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .alert-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        /* 滚动通知 */
+        .notice-bar {
+            background: linear-gradient(90deg, #1e40af, #3b82f6);
+        }
+
+        .notice-content {
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+
+        /* 地图容器 */
+        .map-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 区域点名表格 */
+        .region-table th,
+        .region-table td {
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .region-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .region-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .highlight-red {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* 流动记录列表 */
+        .flow-item {
+            transition: all 0.2s ease;
+        }
+
+        .flow-item:hover {
+            background: #f8fafc;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-progress { background: #dbeafe; color: #1e40af; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-warning { background: #fee2e2; color: #991b1b; }
+    
+        /* 自定义滚动条 */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm">AI区域管控系统</h1>
+                        <p class="text-xs text-gray-400">湖南省监狱</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 导航菜单 -->
+                        <nav class="flex-1 overflow-y-auto py-4 scrollbar-thin" id="sidebarNav">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-data">数据智能</div>
+                <a href="index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-chart-pie w-5"></i><span>数据可视化</span></a>
+                <a href="pages/prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="pages/psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="pages/psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-personnel">人员管理</div>
+                <a href="pages/personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="pages/personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="pages/personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-flow">流动管控</div>
+                <a href="pages/flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="pages/flow/execute.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-running w-5"></i><span>流动执行</span></a>
+                <a href="pages/flow/track.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-location-dot w-5"></i><span>实时追踪</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-call">点名管理</div>
+                <a href="pages/call/plan.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>点名计划</span></a>
+                <a href="pages/call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>点名记录</span></a>
+                <a href="pages/call/report.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>点名报告</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-alert">预警管理</div>
+                <a href="pages/alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="pages/ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-system">系统管理</div>
+                <a href="pages/system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="pages/system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="pages/system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="pages/system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单权限管理</span></a>
+                <a href="pages/system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="pages/system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="pages/system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="pages/system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="pages/business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="pages/business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="pages/business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="pages/business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+
+            <!-- 底部信息 -->
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="avatar" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">系统管理员</p>
+                        <p class="text-xs text-gray-400">admin</p>
+                    </div>
+                    <a href="login.html" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部栏 -->
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i>
+                    <span class="text-gray-400">/</span>
+                    <span>数据可视化</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- 实时连接状态 -->
+                    <div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
+                        <span class="status-indicator status-online"></span>
+                        <span class="text-xs text-green-700">实时连接</span>
+                    </div>
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative" onclick="showRecentAlerts()">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    </button>
+                    <button class="p-2 text-gray-400 hover:text-gray-600" onclick="toggleFullscreen()">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容滚动区 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">总人数</p>
+                                <p class="text-3xl font-bold text-gray-800 stat-number" data-target="4496">4,496</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i class="fas fa-users text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-xs text-gray-400">
+                            <span class="text-green-500"><i class="fas fa-arrow-up"></i> 0.5%</span> 较昨日
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">警察人数</p>
+                                <p class="text-3xl font-bold text-gray-800 stat-number" data-target="558">558</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-user-shield text-indigo-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-xs text-gray-400">
+                            <span class="text-gray-500">值班中: 186人</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">在册罪犯</p>
+                                <p class="text-3xl font-bold text-gray-800 stat-number" data-target="3937">3,937</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center">
+                                <i class="fas fa-user-lock text-cyan-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-xs text-gray-400">
+                            <span class="text-orange-500">零星流动中: 23人</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">职工人数</p>
+                                <p class="text-3xl font-bold text-gray-800 stat-number" data-target="1">1</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                                <i class="fas fa-user-tie text-emerald-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-xs text-gray-400">
+                            <span class="text-green-500">在岗率 100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主要内容区 -->
+                <div class="grid grid-cols-12 gap-4">
+                    <!-- 左侧列：点名结果 -->
+                    <div class="col-span-3 flex flex-col gap-4">
+                        <!-- 监区点名结果 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex-1">
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800">
+                                    <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>监区点名结果
+                                </h3>
+                                <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">实时</span>
+                            </div>
+                            <div class="p-2 overflow-x-auto">
+                                <table class="region-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>监区</th>
+                                            <th>应点</th>
+                                            <th>已点</th>
+                                            <th>未点</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="callTableBody">
+                                        <tr>
+                                            <td class="font-medium">1-1</td>
+                                            <td>209</td>
+                                            <td>209</td>
+                                            <td class="text-gray-400">0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">1-2</td>
+                                            <td>189</td>
+                                            <td>182</td>
+                                            <td class="highlight-red">7</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">2-1</td>
+                                            <td>190</td>
+                                            <td>184</td>
+                                            <td class="highlight-red">6</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">2-2</td>
+                                            <td>213</td>
+                                            <td>213</td>
+                                            <td class="text-gray-400">0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">3-1</td>
+                                            <td>202</td>
+                                            <td>202</td>
+                                            <td class="text-gray-400">0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">3-2</td>
+                                            <td>193</td>
+                                            <td>186</td>
+                                            <td class="highlight-red">7</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">4</td>
+                                            <td>200</td>
+                                            <td>200</td>
+                                            <td class="text-gray-400">0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">严管区</td>
+                                            <td>86</td>
+                                            <td>86</td>
+                                            <td class="text-gray-400">0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 设备状态 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-1 flex flex-col">
+                            <h3 class="font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-server text-blue-500 mr-2"></i>设备状态
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- 视频监控 -->
+                                <div class="text-center">
+                                    <div class="relative w-20 h-20 mx-auto mb-1">
+                                        <canvas id="deviceChart1"></canvas>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-lg font-bold text-gray-800">100<span class="text-xs">%</span></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">视频监控</p>
+                                    <p class="text-xs text-green-600">64/64 在线</p>
+                                </div>
+                                <!-- 门禁设备 -->
+                                <div class="text-center">
+                                    <div class="relative w-20 h-20 mx-auto mb-1">
+                                        <canvas id="deviceChart2"></canvas>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-lg font-bold text-gray-800">96<span class="text-xs">%</span></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">门禁设备</p>
+                                    <p class="text-xs text-green-600">48/50 在线</p>
+                                </div>
+                                <!-- PDA终端 -->
+                                <div class="text-center">
+                                    <div class="relative w-20 h-20 mx-auto mb-1">
+                                        <canvas id="deviceChart3"></canvas>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-lg font-bold text-gray-800">90<span class="text-xs">%</span></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">PDA终端</p>
+                                    <p class="text-xs text-yellow-600">18/20 在线</p>
+                                </div>
+                                <!-- 人脸识别 -->
+                                <div class="text-center">
+                                    <div class="relative w-20 h-20 mx-auto mb-1">
+                                        <canvas id="deviceChart4"></canvas>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-lg font-bold text-gray-800">100<span class="text-xs">%</span></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">人脸识别</p>
+                                    <p class="text-xs text-green-600">32/32 在线</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 中间列：3D地图 -->
+                    <div class="col-span-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800">
+                                    <i class="fas fa-map-marked-alt text-blue-500 mr-2"></i>监狱实景地图
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="toggleMapMode()" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" id="mapToggleBtn">
+                                        <i class="fas fa-cube mr-1"></i>切换2D
+                                    </button>
+                                    <select class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 outline-none">
+                                        <option>全部楼层</option>
+                                        <option>一楼</option>
+                                        <option>二楼</option>
+                                        <option>三楼</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex-1 map-container relative" id="mapContainer">
+                                <!-- 3D地图区域 -->
+                                <div class="absolute inset-0 map-3d-placeholder flex flex-col" id="map3d">
+                                    <!-- 顶部信息栏 -->
+                                    <div class="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+                                        <div class="flex items-center gap-4 text-white text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="status-indicator status-online"></span>
+                                                <span>实时监控中</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-users"></i>
+                                                <span>当前流动: <span id="currentFlowCount" class="font-bold">23</span>人</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-clock"></i>
+                                                <span>数据刷新: <span id="refreshTimer">5</span>s</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <span class="floor-tag" onclick="switchFloor(1)">一楼</span>
+                                            <span class="floor-tag" onclick="switchFloor(2)">二楼</span>
+                                            <span class="floor-tag" onclick="switchFloor(3)">三楼</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3D网格背景 -->
+                                    <div class="grid-bg opacity-30"></div>
+
+                                    <!-- 建筑区块 -->
+                                    <div class="absolute inset-0 p-8">
+                                        <!-- 第一排建筑 -->
+                                        <div class="building-block" style="left: 8%; top: 15%; width: 18%; height: 25%;" onclick="showAreaDetail('1-1')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>1-1监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 209人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 28%; top: 15%; width: 18%; height: 25%;" onclick="showAreaDetail('1-2')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>1-2监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 189人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 48%; top: 15%; width: 18%; height: 25%;" onclick="showAreaDetail('2-1')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>2-1监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 190人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 68%; top: 15%; width: 18%; height: 25%;" onclick="showAreaDetail('2-2')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>2-2监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 213人</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 第二排建筑 -->
+                                        <div class="building-block" style="left: 8%; top: 50%; width: 15%; height: 20%;" onclick="showAreaDetail('3-1')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>3-1监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 202人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 25%; top: 50%; width: 15%; height: 20%;" onclick="showAreaDetail('3-2')">
+                                            <div class="text-white text-xs p-2 warning">
+                                                <i class="fas fa-building mr-1"></i>3-2监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 193人 <span class="text-red-300">⚠️7人未点</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 42%; top: 50%; width: 15%; height: 20%;" onclick="showAreaDetail('4')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-building mr-1"></i>4监区
+                                                <div class="text-xs mt-1 opacity-75">在押: 200人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block warning" style="left: 59%; top: 50%; width: 12%; height: 20%;" onclick="showAreaDetail('严管')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-shield-alt mr-1"></i>严管区
+                                                <div class="text-xs mt-1 opacity-75">在押: 86人</div>
+                                            </div>
+                                        </div>
+                                        <div class="building-block" style="left: 73%; top: 50%; width: 20%; height: 20%; background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(16, 185, 129, 0.2)); border-color: rgba(16, 185, 129, 0.5);" onclick="showAreaDetail('其他')">
+                                            <div class="text-white text-xs p-2">
+                                                <i class="fas fa-clinic-medical mr-1"></i>医疗监区
+                                                <div class="text-xs mt-1 opacity-75">流动中: 3人</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 流动人员标记 -->
+                                    <div class="person-marker" id="person1" style="left: 65%; top: 25%;"></div>
+                                    <div class="person-marker" id="person2" style="left: 72%; top: 35%;"></div>
+                                    <div class="person-marker" id="person3" style="left: 55%; top: 55%;"></div>
+                                    <div class="person-marker" id="person4" style="left: 30%; top: 60%;"></div>
+                                    <div class="person-marker" style="left: 80%; top: 45%;"></div>
+
+                                    <!-- 区域图例 -->
+                                    <div class="absolute bottom-16 left-4 flex flex-col gap-2 text-white text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-4 h-4 rounded bg-blue-500"></span>
+                                            <span>正常区域 (12)</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-4 h-4 rounded bg-red-500"></span>
+                                            <span>预警区域 (2)</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-4 h-4 rounded bg-green-500"></span>
+                                            <span>流动中 (<span id="flowLegendCount">23</span>)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 2D地图占位（默认隐藏） -->
+                                <div class="absolute inset-0 bg-slate-100 hidden" id="map2d">
+                                    <div class="absolute inset-0 p-4">
+                                        <svg viewBox="0 0 800 500" class="w-full h-full">
+                                            <!-- 背景网格 -->
+                                            <defs>
+                                                <pattern id="grid2d" width="40" height="40" patternUnits="userSpaceOnUse">
+                                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#cbd5e1" stroke-width="0.5"/>
+                                                </pattern>
+                                            </defs>
+                                            <rect width="800" height="500" fill="url(#grid2d)"/>
+
+                                            <!-- 监区建筑 -->
+                                            <rect x="50" y="50" width="120" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="110" y="95" text-anchor="middle" fill="white" font-size="12">1-1监区</text>
+
+                                            <rect x="190" y="50" width="120" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="250" y="95" text-anchor="middle" fill="white" font-size="12">1-2监区</text>
+
+                                            <rect x="330" y="50" width="120" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="390" y="95" text-anchor="middle" fill="white" font-size="12">2-1监区</text>
+
+                                            <rect x="470" y="50" width="120" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="530" y="95" text-anchor="middle" fill="white" font-size="12">2-2监区</text>
+
+                                            <rect x="50" y="200" width="100" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="100" y="245" text-anchor="middle" fill="white" font-size="12">3-1监区</text>
+
+                                            <rect x="170" y="200" width="100" height="80" fill="#ef4444" rx="4" opacity="0.8" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="220" y="245" text-anchor="middle" fill="white" font-size="12">3-2监区</text>
+
+                                            <rect x="290" y="200" width="100" height="80" fill="#3b82f6" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="340" y="245" text-anchor="middle" fill="white" font-size="12">4监区</text>
+
+                                            <rect x="410" y="200" width="100" height="80" fill="#ef4444" rx="4" opacity="0.8" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="460" y="245" text-anchor="middle" fill="white" font-size="12">严管区</text>
+
+                                            <!-- 其他建筑 -->
+                                            <rect x="530" y="200" width="140" height="80" fill="#10b981" rx="4" opacity="0.7" class="cursor-pointer hover:opacity-90"/>
+                                            <text x="600" y="245" text-anchor="middle" fill="white" font-size="12">医疗/其他</text>
+
+                                            <!-- 流动路线 -->
+                                            <line x1="200" y1="90" x2="330" y2="90" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5">
+                                                <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite"/>
+                                            </line>
+                                            <circle cx="265" cy="90" r="6" fill="#3b82f6">
+                                                <animate attributeName="cx" values="200;330;200" dur="3s" repeatCount="indefinite"/>
+                                            </circle>
+
+                                            <line x1="340" y1="240" x2="410" y2="240" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>
+                                            <circle cx="375" cy="240" r="6" fill="#10b981">
+                                                <animate attributeName="cx" values="340;410;340" dur="4s" repeatCount="indefinite"/>
+                                            </circle>
+                                        </svg>
+
+                                        <!-- 图例 -->
+                                        <div class="absolute bottom-4 left-4 flex gap-4 text-xs">
+                                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-500"></span>正常监区</div>
+                                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-500"></span>预警监区</div>
+                                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-500"></span>其他区域</div>
+                                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-500 border-2 border-dashed"></span>流动路线</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 地图控制按钮 -->
+                                <div class="absolute bottom-4 right-4 flex flex-col gap-2">
+                                    <button class="w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-blue-500">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-blue-500">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-blue-500">
+                                        <i class="fas fa-compass"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧列：预警 + 流动 -->
+                    <div class="col-span-3 space-y-4">
+                        <!-- 预警处理统计 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>预警处理
+                                </h3>
+                                <a href="pages/alert/list.html" class="text-xs text-blue-500 hover:text-blue-600">查看全部</a>
+                            </div>
+                            <div class="p-4">
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="text-center p-3 bg-red-50 rounded-lg alert-stat-item">
+                                        <p class="text-2xl font-bold text-red-600 count">3</p>
+                                        <p class="text-xs text-gray-600">未处理预警</p>
+                                        <span class="text-xs text-red-400 mt-1 block"><i class="fas fa-arrow-up mr-1"></i>实时更新</span>
+                                    </div>
+                                    <div class="text-center p-3 bg-green-50 rounded-lg alert-stat-item">
+                                        <p class="text-2xl font-bold text-green-600 count">128</p>
+                                        <p class="text-xs text-gray-600">已处理今日</p>
+                                        <span class="text-xs text-green-400 mt-1 block"><i class="fas fa-check mr-1"></i>处置率 98%</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                            区域管控预警
+                                        </span>
+                                        <span class="text-red-600 font-medium">1</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                            AB门通行预警
+                                        </span>
+                                        <span class="text-orange-600 font-medium">1</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                            高频就医预警
+                                        </span>
+                                        <span class="text-yellow-600 font-medium">1</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                            AI行为预警
+                                        </span>
+                                        <span class="text-blue-600 font-medium">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 零星流动 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex-1">
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-800">
+                                    <i class="fas fa-walking text-blue-500 mr-2"></i>零星流动
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <select class="px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:border-blue-500">
+                                        <option>全部监区</option>
+                                        <option>1-1监区</option>
+                                        <option>1-2监区</option>
+                                        <option>2-1监区</option>
+                                        <option>2-2监区</option>
+                                        <option>严管区</option>
+                                    </select>
+                                    <select class="px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:border-blue-500">
+                                        <option>全部状态</option>
+                                        <option>进行中</option>
+                                        <option>审批中</option>
+                                        <option>已完成</option>
+                                        <option>超时</option>
+                                    </select>
+                                    <a href="pages/flow/list.html" class="text-xs text-blue-500 hover:text-blue-600">查看全部</a>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <div class="space-y-1">
+                                    <div class="flow-item p-2 rounded-lg border border-gray-100">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700">张警官</span>
+                                            <span class="status-tag status-progress">进行中</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">监内就医 → 医疗监区</p>
+                                        <p class="text-xs text-gray-400 mt-1">10:23 出发</p>
+                                    </div>
+                                    <div class="flow-item p-2 rounded-lg border border-gray-100">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700">李警官</span>
+                                            <span class="status-tag status-progress">进行中</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">会见 → 会见楼</p>
+                                        <p class="text-xs text-gray-400 mt-1">10:15 出发</p>
+                                    </div>
+                                    <div class="flow-item p-2 rounded-lg border border-gray-100">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700">王警官</span>
+                                            <span class="status-tag status-warning">超时</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">送餐送货 → 食堂</p>
+                                        <p class="text-xs text-red-500 mt-1">已超时 23分钟</p>
+                                    </div>
+                                    <div class="flow-item p-2 rounded-lg border border-gray-100">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700">赵警官</span>
+                                            <span class="status-tag status-pending">审批中</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">教育学习 → 教学楼</p>
+                                        <p class="text-xs text-gray-400 mt-1">等待狱政科审批</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 心理风险预警 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                            <h3 class="font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-brain text-purple-500 mr-2"></i>心理风险预警
+                            </h3>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="text-center">
+                                    <p class="text-xl font-bold text-red-600">2</p>
+                                    <p class="text-xs text-gray-500">极高风险</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xl font-bold text-orange-500">5</p>
+                                    <p class="text-xs text-gray-500">高风险</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xl font-bold text-yellow-500">12</p>
+                                    <p class="text-xs text-gray-500">中风险</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xl font-bold text-green-500">3918</p>
+                                    <p class="text-xs text-gray-500">低风险</p>
+                                </div>
+                            </div>
+                            <a href="pages/psyche/dashboard.html" class="block text-center text-xs text-blue-500 hover:text-blue-600 py-2 bg-blue-50 rounded-lg">
+                                查看风险详情 <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部图表区域 -->
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-chart-line text-blue-500 mr-2"></i>近7日预警趋势
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="alertTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-chart-pie text-blue-500 mr-2"></i>预警类型分布
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="alertTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-chart-bar text-blue-500 mr-2"></i>各监区流动统计
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="flowChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部通知栏 -->
+            <div class="notice-bar text-white px-4 py-2 flex items-center gap-3">
+                <span class="bg-white/20 px-2 py-0.5 rounded text-xs">通知</span>
+                <div class="flex-1 overflow-hidden">
+                    <div class="notice-content whitespace-nowrap">
+                        【系统通知】今日15:00进行系统维护，预计持续30分钟，请提前保存工作 | 【预警】1-2监区发现未按时归队人员，请相关民警及时处理 | 【通知】省局数据同步完成，本次同步成功10000条记录 | 【AI预警】视频分析检测到2号车间有异常聚集行为，已生成预警待处理
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 地图模式切换
+        let is3DMode = true;
+        function toggleMapMode() {
+            is3DMode = !is3DMode;
+            const map3d = document.getElementById('map3d');
+            const map2d = document.getElementById('map2d');
+            const btn = document.getElementById('mapToggleBtn');
+
+            if (is3DMode) {
+                map3d.classList.remove('hidden');
+                map2d.classList.add('hidden');
+                btn.innerHTML = '<i class="fas fa-cube mr-1"></i>切换2D';
+            } else {
+                map3d.classList.add('hidden');
+                map2d.classList.remove('hidden');
+                btn.innerHTML = '<i class="fas fa-map mr-1"></i>切换3D';
+            }
+        }
+
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 预警趋势图
+            const alertTrendCtx = document.getElementById('alertTrendChart').getContext('2d');
+            new Chart(alertTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '预警数量',
+                        data: [45, 52, 38, 65, 48, 42, 35],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                        x: { ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 预警类型分布
+            const alertTypeCtx = document.getElementById('alertTypeChart').getContext('2d');
+            new Chart(alertTypeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['区域管控', 'AB门通行', '高频就医', 'AI行为'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: ['#ef4444', '#f97316', '#eab308', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { font: { size: 10 } } } }
+                }
+            });
+
+            // 流动统计
+            const flowCtx = document.getElementById('flowChart').getContext('2d');
+            new Chart(flowCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1-1', '1-2', '2-1', '2-2', '3-1', '3-2', '4', '严管'],
+                    datasets: [{
+                        label: '流动次数',
+                        data: [12, 18, 15, 22, 14, 19, 16, 8],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                        x: { ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 设备在线率环形图
+            const deviceChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
+            };
+
+            // 视频监控 - 100%
+            new Chart(document.getElementById('deviceChart1'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['在线', '离线'],
+                    datasets: [{
+                        data: [64, 0],
+                        backgroundColor: ['#22c55e', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: deviceChartOptions
+            });
+
+            // 门禁设备 - 96%
+            new Chart(document.getElementById('deviceChart2'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['在线', '离线'],
+                    datasets: [{
+                        data: [48, 2],
+                        backgroundColor: ['#22c55e', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: deviceChartOptions
+            });
+
+            // PDA终端 - 90%
+            new Chart(document.getElementById('deviceChart3'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['在线', '离线'],
+                    datasets: [{
+                        data: [18, 2],
+                        backgroundColor: ['#eab308', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: deviceChartOptions
+            });
+
+            // 人脸识别 - 100%
+            new Chart(document.getElementById('deviceChart4'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['在线', '离线'],
+                    datasets: [{
+                        data: [32, 0],
+                        backgroundColor: ['#22c55e', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: deviceChartOptions
+            });
+        });
+
+        // 数字动画
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.stat-number');
+            numbers.forEach(num => {
+                const target = parseInt(num.dataset.target);
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    num.textContent = Math.floor(current).toLocaleString();
+                }, 20);
+            });
+        }
+
+        // 页面加载完成后执行动画
+        window.addEventListener('load', animateNumbers);
+
+        // ========== 导航栏滚动位置记忆 ==========
+        // 使用 localStorage 保存滚动位置（在同源所有页面共享）
+        const SCROLL_KEY = 'sidebarNavScrollPos';
+
+        function saveScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem(SCROLL_KEY, sidebarNav.scrollTop);
+        }
+
+        function restoreScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (!sidebarNav) return;
+            const savedPos = localStorage.getItem(SCROLL_KEY);
+            if (savedPos !== null) {
+                // 使用 requestAnimationFrame 确保在下一帧渲染后再设置
+                requestAnimationFrame(() => {
+                    sidebarNav.scrollTop = parseInt(savedPos, 10);
+                });
+            }
+        }
+
+        // 页面即将离开时保存滚动位置
+        window.addEventListener('beforeunload', function() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem('sidebarNavScrollPos', sidebarNav.scrollTop);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取当前页面路径键（用于导航高亮）
+            function getPathKey(url, href) {
+                const urlParts = url.split('/');
+                let currentDir = urlParts.slice(3, -1);
+                if (href === null || href === undefined || href === '') {
+                    return currentDir.concat([urlParts[urlParts.length - 1]]).join('/');
+                }
+                const linkParts = href.split('/');
+                for (let i = 0; i < linkParts.length - 1; i++) {
+                    const part = linkParts[i];
+                    if (part === '..') currentDir.pop();
+                    else if (part && part !== '.') currentDir.push(part);
+                }
+                const filename = linkParts[linkParts.length - 1];
+                currentDir.push(filename);
+                return currentDir.join('/');
+            }
+            const currentPath = window.location.href;
+            const currentKey = getPathKey(currentPath, currentPath.split('/').pop());
+            document.querySelectorAll('#sidebarNav a').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                const linkKey = getPathKey(currentPath, linkHref);
+                if (linkKey === currentKey) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+
+        // ========== 新增：驾驶舱增强功能 ==========
+
+        // 实时数据刷新模拟（模拟WebSocket推送）
+        let refreshSeconds = 5;
+        const refreshInterval = setInterval(() => {
+            refreshSeconds--;
+            document.getElementById('refreshTimer').textContent = refreshSeconds;
+            if (refreshSeconds <= 0) {
+                refreshSeconds = 5;
+                simulateDataUpdate();
+            }
+        }, 1000);
+
+        function simulateDataUpdate() {
+            // 模拟数据变化
+            const flowCount = document.getElementById('currentFlowCount');
+            const newFlow = Math.floor(Math.random() * 10) + 18;
+            flowCount.textContent = newFlow;
+            document.getElementById('flowLegendCount').textContent = newFlow;
+
+            // 闪烁更新效果
+            document.querySelector('.stat-card:nth-child(3)').classList.add('data-refreshing');
+            setTimeout(() => {
+                document.querySelector('.stat-card:nth-child(3)').classList.remove('data-refreshing');
+            }, 500);
+
+            // 随机生成预警推送
+            if (Math.random() < 0.15) {
+                showAlertToast();
+            }
+
+            // 模拟流动人员移动
+            movePersonMarkers();
+        }
+
+        // 预警推送吐司
+        function showAlertToast() {
+            const toast = document.createElement('div');
+            toast.className = `alert-toast ${Math.random() > 0.5 ? 'warning' : 'info'}`;
+            toast.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-semibold text-gray-800">${['区域管控预警', 'AB门通行预警', '超时预警', 'AI行为预警'][Math.floor(Math.random() * 4)]}</span>
+                            <span class="text-xs text-gray-400">刚刚</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">${['1-2监区发现异常', '2号门禁长时间未关闭', '流动超时已超过15分钟', '3-1监区检测到聚集行为'][Math.floor(Math.random() * 4)]}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // 楼层切换
+        let currentFloor = 1;
+        function switchFloor(floor) {
+            currentFloor = floor;
+            document.querySelectorAll('.floor-tag').forEach((tag, idx) => {
+                if (idx + 1 === floor) {
+                    tag.style.background = 'rgba(59, 130, 246, 0.5)';
+                    tag.style.color = 'white';
+                } else {
+                    tag.style.background = 'rgba(255,255,255,0.1)';
+                    tag.style.color = 'rgba(255,255,255,0.7)';
+                }
+            });
+
+            // 模拟楼层数据变化
+            const floorData = {
+                1: { flow: 23, alert: 2 },
+                2: { flow: 15, alert: 0 },
+                3: { flow: 8, alert: 1 }
+            };
+            document.getElementById('currentFlowCount').textContent = floorData[floor].flow;
+            document.getElementById('flowLegendCount').textContent = floorData[floor].flow;
+        }
+
+        // 区域详情弹窗
+        function showAreaDetail(areaName) {
+            const areaData = {
+                '1-1': { total: 209, flow: 5, alert: 0, callRate: '100%' },
+                '1-2': { total: 189, flow: 3, alert: 1, callRate: '96%' },
+                '2-1': { total: 190, flow: 4, alert: 0, callRate: '97%' },
+                '2-2': { total: 213, flow: 2, alert: 0, callRate: '100%' },
+                '3-1': { total: 202, flow: 6, alert: 0, callRate: '100%' },
+                '3-2': { total: 193, flow: 4, alert: 1, callRate: '96%' },
+                '4': { total: 200, flow: 3, alert: 0, callRate: '100%' },
+                '严管': { total: 86, flow: 1, alert: 1, callRate: '100%' },
+                '其他': { total: 50, flow: 3, alert: 0, callRate: '100%' }
+            };
+            const data = areaData[areaName] || { total: 0, flow: 0, alert: 0, callRate: '--' };
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl p-6 w-96 shadow-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">
+                            <i class="fas fa-building mr-2 text-blue-500"></i>${areaName}监区详情
+                        </h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-3 text-center">
+                            <p class="text-2xl font-bold text-blue-600">${data.total}</p>
+                            <p class="text-xs text-gray-600">在押人数</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3 text-center">
+                            <p class="text-2xl font-bold text-green-600">${data.flow}</p>
+                            <p class="text-xs text-gray-600">流动中</p>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-3 text-center">
+                            <p class="text-2xl font-bold text-red-600">${data.alert}</p>
+                            <p class="text-xs text-gray-600">预警数</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3 text-center">
+                            <p class="text-2xl font-bold text-purple-600">${data.callRate}</p>
+                            <p class="text-xs text-gray-600">点名率</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="alert('跳转到该监区人员列表')" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                            <i class="fas fa-users mr-1"></i>人员列表
+                        </button>
+                        <button onclick="alert('跳转到该监区点名')" class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">
+                            <i class="fas fa-clipboard-check mr-1"></i>点名管理
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 流动人员标记动画
+        function movePersonMarkers() {
+            const markers = document.querySelectorAll('.person-marker');
+            markers.forEach((marker, idx) => {
+                const offsetX = (Math.random() - 0.5) * 20;
+                const offsetY = (Math.random() - 0.5) * 20;
+                const currentLeft = parseFloat(marker.style.left);
+                const currentTop = parseFloat(marker.style.top);
+                marker.style.left = Math.max(5, Math.min(95, currentLeft + offsetX * 0.1)) + '%';
+                marker.style.top = Math.max(10, Math.min(90, currentTop + offsetY * 0.1)) + '%';
+            });
+        }
+
+        // 实时预警统计更新
+        function updateAlertStats() {
+            const alertCounts = document.querySelectorAll('.alert-stat-item');
+            alertCounts.forEach(item => {
+                const current = parseInt(item.querySelector('.count').textContent);
+                const change = Math.floor(Math.random() * 3);
+                if (Math.random() > 0.5) {
+                    item.querySelector('.count').textContent = current + change;
+                    item.classList.add('data-refreshing');
+                    setTimeout(() => item.classList.remove('data-refreshing'), 500);
+                }
+            });
+        }
+        setInterval(updateAlertStats, 8000);
+
+        // 设备状态脉冲效果
+        function pulseDeviceStatus() {
+            document.querySelectorAll('.device-status-dot').forEach(dot => {
+                dot.style.animation = 'none';
+                setTimeout(() => dot.style.animation = '', 10);
+            });
+        }
+
+        // 显示最近预警列表
+        function showRecentAlerts() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl w-full max-w-md shadow-2xl">
+                    <div class="px-4 py-3 border-b flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">
+                            <i class="fas fa-bell mr-2 text-red-500"></i>最新预警
+                        </h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-2 max-h-96 overflow-y-auto">
+                        <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                <span class="font-medium text-sm">区域管控预警</span>
+                                <span class="text-xs text-gray-400 ml-auto">2分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-600 pl-4">1-2监区发现未按时归队人员</p>
+                        </div>
+                        <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                <span class="font-medium text-sm">AB门通行预警</span>
+                                <span class="text-xs text-gray-400 ml-auto">5分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-600 pl-4">2号门禁长时间未关闭</p>
+                        </div>
+                        <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                <span class="font-medium text-sm">高频就医预警</span>
+                                <span class="text-xs text-gray-400 ml-auto">10分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-600 pl-4">罪犯张某本月就医次数超过阈值</p>
+                        </div>
+                        <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                <span class="font-medium text-sm">超时预警</span>
+                                <span class="text-xs text-gray-400 ml-auto">15分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-600 pl-4">流动超时已超过15分钟</p>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 border-t bg-gray-50 rounded-b-xl">
+                        <a href="pages/alert/list.html" class="block text-center text-sm text-blue-500 hover:text-blue-600">
+                            查看全部预警 <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 全屏切换
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>

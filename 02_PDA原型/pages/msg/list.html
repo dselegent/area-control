@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>消息中心 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .filter-tag {
+            border: 1.5px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .filter-tag.active {
+            border-color: var(--primary);
+            background: rgba(26,82,118,0.08);
+            color: var(--primary);
+        }
+
+        .msg-card {
+            background: #fff;
+            border: 1px solid rgba(226,232,240,0.8);
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
+            transition: all 0.2s;
+        }
+        .msg-card:active { background: #f8fafc; }
+        .msg-unread { border-left: 3px solid #1a5276; }
+
+        .msg-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .icon-todo { background: #dbeafe; color: #1d4ed8; }
+        .icon-warning { background: #fef3c7; color: #d97706; }
+        .icon-success { background: #dcfce7; color: #16a34a; }
+        .icon-notice { background: #ede9fe; color: #7c3aed; }
+        .icon-sync { background: #ccfbf1; color: #0d9488; }
+        .icon-alert { background: #fae8e8; color: #dc2626; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">消息中心</h1>
+        <button onclick="markAllRead()" class="text-xs text-white/80">全部已读</button>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 筛选标签 -->
+        <div class="flex gap-2 overflow-x-auto pb-1">
+            <button onclick="filterMsg(this, 'all')" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
+            <button onclick="filterMsg(this, 'todo')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">待办 (3)</button>
+            <button onclick="filterMsg(this, 'notice')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">通知</button>
+        </div>
+
+        <!-- 消息列表 -->
+        <div class="space-y-3">
+            <!-- 待办-点名 -->
+            <a href="#" class="msg-card msg-unread rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-todo">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">点名任务提醒</span>
+                            <span class="text-xs text-gray-400">15分钟前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">晚间点名将于21:00开始，请做好准备</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 待办-超时 -->
+            <a href="#" class="msg-card msg-unread rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">流动即将超时</span>
+                            <span class="text-xs text-gray-400">30分钟前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">张某某 监内就医流动 剩余18分钟</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 通知-通过 -->
+            <a href="#" class="msg-card rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">流动申请已通过</span>
+                            <span class="text-xs text-gray-400">2小时前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">您提交的 监内就医 申请已获审批通过</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 通知-公告 -->
+            <a href="#" class="msg-card rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-notice">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">系统公告</span>
+                            <span class="text-xs text-gray-400">3小时前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">今日15:00进行系统维护，预计30分钟</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 通知-同步 -->
+            <a href="#" class="msg-card rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-sync">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">数据同步完成</span>
+                            <span class="text-xs text-gray-400">5小时前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">省局数据同步完成，本次同步10000条</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 通知-心理风险 -->
+            <a href="#" class="msg-card rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="msg-icon icon-alert">
+                        <i class="fas fa-heart-pulse"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800">心理风险提醒</span>
+                            <span class="text-xs text-gray-400">6小时前</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">李某某 风险等级由中升为高，请关注</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="h-4"></div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="../call/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-clipboard-check text-lg"></i></div>
+            <span class="text-[11px] mt-1">点名</span>
+        </a>
+        <a href="../id-check/scan.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-qrcode text-lg"></i></div>
+            <span class="text-[11px] mt-1">扫码</span>
+        </a>
+        <a href="../flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-envelope text-lg"></i></div>
+            <span class="text-[11px] mt-1">消息</span>
+        </a>
+    </nav>
+
+    <script>
+        function filterMsg(btn, type) {
+            document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        function markAllRead() {
+            document.querySelectorAll('.msg-unread').forEach(el => el.classList.remove('msg-unread'));
+            alert('已全部标记为已读');
+        }
+    </script>
+</body>
+</html>

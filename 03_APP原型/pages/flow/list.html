@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>流动记录 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .search-input { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .filter-tag { border: 1.5px solid #e2e8f0; transition: all 0.2s; }
+        .filter-tag.active { border-color: var(--primary); background: rgba(26,82,118,0.08); color: var(--primary); }
+
+        .flow-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+        .flow-overdue { border-left: 4px solid #dc2626; }
+        .flow-progress { border-left: 4px solid #1d4ed8; }
+        .flow-pending { border-left: 4px solid #d97706; }
+        .flow-done { border-left: 4px solid #22c55e; opacity: 0.6; }
+
+        .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+        .tag-overdue { background: #fee2e2; color: #dc2626; }
+        .tag-progress { background: #dbeafe; color: #1d4ed8; }
+        .tag-pending { background: #fef3c7; color: #d97706; }
+        .tag-done { background: #dcfce7; color: #16a34a; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+        .tab-active .tab-icon { background: #dbeafe; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">流动记录</h1>
+        <a href="apply.html" class="text-white"><i class="fas fa-plus text-lg"></i></a>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 搜索栏 -->
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" class="search-input w-full pl-11 pr-4 py-3 rounded-xl text-sm outline-none" placeholder="搜索人员姓名/编号">
+        </div>
+
+        <!-- 筛选标签 -->
+        <div class="flex gap-2 overflow-x-auto">
+            <button onclick="filterList(this)" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">进行中</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">审批中</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">已完成</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">超时</button>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-3 gap-3">
+            <div class="flow-card rounded-xl p-3 text-center">
+                <p class="text-xl font-bold" style="color:var(--primary)">12</p>
+                <p class="text-xs text-gray-500">今日流动</p>
+            </div>
+            <div class="flow-card rounded-xl p-3 text-center">
+                <p class="text-xl font-bold text-orange-500">3</p>
+                <p class="text-xs text-gray-500">在途人员</p>
+            </div>
+            <div class="flow-card rounded-xl p-3 text-center">
+                <p class="text-xl font-bold text-red-500">1</p>
+                <p class="text-xs text-gray-500">超时</p>
+            </div>
+        </div>
+
+        <!-- 记录列表 -->
+        <div class="space-y-3">
+            <div class="flow-card flow-overdue rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="tag tag-overdue">超时</span>
+                        <span class="text-xs text-gray-400">送餐送货</span>
+                    </div>
+                    <span class="text-xs text-red-500 font-medium">超时 23分钟</span>
+                </div>
+                <p class="text-sm font-medium text-gray-800">王某某 · 430100-0201</p>
+                <p class="text-xs text-gray-500">1-2监区 → 食堂 · 09:30出发</p>
+            </div>
+
+            <div class="flow-card flow-progress rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="tag tag-progress">进行中</span>
+                        <span class="text-xs text-gray-400">监内就医</span>
+                    </div>
+                    <span class="text-xs text-orange-500 font-medium">剩余 18分钟</span>
+                </div>
+                <p class="text-sm font-medium text-gray-800">张某某 · 430100-0105</p>
+                <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 10:23出发</p>
+            </div>
+
+            <div class="flow-card flow-pending rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="tag tag-pending">审批中</span>
+                        <span class="text-xs text-gray-400">教育学习</span>
+                    </div>
+                    <span class="text-xs text-gray-500">等待审批</span>
+                </div>
+                <p class="text-sm font-medium text-gray-800">赵某某 · 430100-0089</p>
+                <p class="text-xs text-gray-500">1-2监区 → 教学楼 · 09:45提交</p>
+            </div>
+
+            <div class="flow-card flow-done rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="tag tag-done">已完成</span>
+                        <span class="text-xs text-gray-400">监内就医</span>
+                    </div>
+                    <span class="text-xs text-green-600">已归档</span>
+                </div>
+                <p class="text-sm font-medium text-gray-800">陈某某 · 430100-0089</p>
+                <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 08:00-09:15</p>
+            </div>
+        </div>
+
+        <div class="h-4"></div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="../alert/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-bell text-lg"></i></div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">3</span>
+            <span class="text-[11px] mt-1">预警</span>
+        </a>
+        <a href="../msg/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-envelope text-lg"></i></div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">8</span>
+            <span class="text-[11px] mt-1">消息</span>
+        </a>
+        <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-user text-lg"></i></div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        function filterList(btn) {
+            document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>预警中心 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .tab-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(26,82,118,0.08); }
+        .tab-item.active { color: var(--primary); }
+        .tab-item.active .tab-icon { background: rgba(26,82,118,0.08); }
+
+        .alert-item { transition: all 0.2s; }
+        .alert-item:active { transform: scale(0.98); }
+
+        .alert-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .alert-urgent { border-left: 4px solid #dc2626; }
+        .alert-important { border-left: 4px solid #f97316; }
+        .alert-normal { border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">预警中心</h1>
+        <button class="text-white/80"><i class="fas fa-filter text-lg"></i></button>
+    </div>
+
+    <div class="p-4 space-y-3">
+        <!-- 预警统计 -->
+        <div class="grid grid-cols-4 gap-2">
+            <div class="bg-red-500 text-white rounded-xl p-3 text-center">
+                <p class="text-xl font-bold">2</p>
+                <p class="text-[11px] text-red-100">紧急</p>
+            </div>
+            <div class="bg-orange-500 text-white rounded-xl p-3 text-center">
+                <p class="text-xl font-bold">5</p>
+                <p class="text-[11px] text-orange-100">重要</p>
+            </div>
+            <div class="bg-blue-500 text-white rounded-xl p-3 text-center">
+                <p class="text-xl font-bold">8</p>
+                <p class="text-[11px] text-blue-100">一般</p>
+            </div>
+            <div class="bg-gray-400 text-white rounded-xl p-3 text-center">
+                <p class="text-xl font-bold">12</p>
+                <p class="text-[11px] text-gray-100">已归档</p>
+            </div>
+        </div>
+
+        <!-- 筛选 -->
+        <div class="flex gap-2 overflow-x-auto pb-1">
+            <button onclick="filterList(this)" class="tab-btn active flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">待处理</button>
+            <button onclick="filterList(this)" class="tab-btn flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">处理中</button>
+            <button onclick="filterList(this)" class="tab-btn flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">已归档</button>
+            <button onclick="filterList(this)" class="tab-btn flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">AI预警</button>
+        </div>
+
+        <!-- 预警列表 -->
+        <div class="space-y-2">
+            <a href="detail.html" class="alert-item flex items-center gap-3 p-4 rounded-2xl alert-urgent">
+                <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation text-red-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">紧急</span>
+                        <span class="text-xs text-gray-400">2分钟前</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800">1-2监区2号车间异常聚集</p>
+                    <p class="text-xs text-gray-500 mt-0.5">AI检测到3人以上聚集，持续超过2分钟</p>
+                </div>
+            </a>
+
+            <a href="detail.html" class="alert-item flex items-center gap-3 p-4 rounded-2xl alert-important">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-orange-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">重要</span>
+                        <span class="text-xs text-gray-400">8分钟前</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800">3监区3号车间攀爬行为</p>
+                    <p class="text-xs text-gray-500 mt-0.5">AI检测到攀爬围栏行为</p>
+                </div>
+            </a>
+
+            <a href="detail.html" class="alert-item flex items-center gap-3 p-4 rounded-2xl alert-normal">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-info text-blue-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">一般</span>
+                        <span class="text-xs text-gray-400">15分钟前</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800">5监区人员离岗超时</p>
+                    <p class="text-xs text-gray-500 mt-0.5">人员离开监控区域超过5分钟</p>
+                </div>
+            </a>
+
+            <a href="detail.html" class="alert-item flex items-center gap-3 p-4 rounded-2xl alert-important">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-fist-raised text-orange-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">重要</span>
+                        <span class="text-xs text-gray-400">32分钟前</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800">4监区活动场打架行为</p>
+                    <p class="text-xs text-gray-500 mt-0.5">AI检测到肢体冲突行为</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="h-4"></div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-home text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="../flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-person-walking-with-cane text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl relative">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <i class="fas fa-bell text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">预警</span>
+        </a>
+        <a href="../msg/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-envelope text-lg"></i>
+            </div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">8</span>
+            <span class="text-[11px] mt-1">消息</span>
+        </a>
+        <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        function filterList(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

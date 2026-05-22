@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>首页 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-dark: #154360;
+            --secondary: #2874a6;
+            --accent: #3498db;
+            --surface: #fff;
+            --bg-page: #f1f5f9;
+        }
+
+        * {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-page);
+        }
+
+        /* 头部渐变 */
+        .header-bg {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 50%, #154360 100%);
+            position: relative;
+        }
+
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--surface);
+            border: 1px solid rgba(226,232,240,0.8);
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+            background: #f8fafc;
+        }
+
+        /* 功能入口 */
+        .menu-grid .card {
+            transition: all 0.2s ease;
+        }
+
+        .menu-grid .card:active {
+            transform: scale(0.96);
+        }
+
+        .menu-icon {
+            background: linear-gradient(135deg, rgba(26,82,118,0.08) 0%, rgba(52,152,219,0.06) 100%);
+        }
+
+        .menu-icon i {
+            background: linear-gradient(145deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 警示项 */
+        .alert-item { transition: all 0.2s ease; }
+        .alert-item:active { transform: scale(0.98); }
+
+        .alert-urgent { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 3px solid #dc2626; }
+        .alert-important { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-left: 3px solid #f97316; }
+        .alert-normal { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 3px solid #3b82f6; }
+
+        /* 标签 */
+        .tag-label {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .tag-urgent { background: #dc2626; color: #fff; }
+        .tag-important { background: #f97316; color: #fff; }
+        .tag-normal { background: #3b82f6; color: #fff; }
+
+        /* 进度条 */
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e 0%, #4ade80 100%);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        /* 统计数字 */
+        .stat-gradient {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 滚动通知 */
+        .notice-scroll {
+            animation: scrollNotice 20s linear infinite;
+        }
+
+        @keyframes scrollNotice {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Tab激活 */
+        .tab-active {
+            color: var(--primary);
+            background: rgba(26,82,118,0.08);
+        }
+
+        /* 消息角标 */
+        .msg-badge {
+            min-width: 16px;
+            height: 16px;
+            font-size: 10px;
+            background: #dc2626;
+            color: #fff;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 安全区域 */
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        @media screen and (height: 812px) {
+            .safe-area-bottom { padding-bottom: 34px; }
+        }
+
+        /* 加载动画 */
+        .loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部状态栏 -->
+    <div class="header-bg text-white px-4 pt-4 pb-5 relative">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium">张警官</p>
+                    <p class="text-xs text-blue-200">狱政科 · 科长</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur relative">
+                    <i class="fas fa-bell text-sm"></i>
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center">5</span>
+                </button>
+                <button class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur">
+                    <i class="fas fa-qrcode text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 实时态势总览 -->
+        <div class="grid grid-cols-4 gap-2">
+            <div class="bg-white/10 backdrop-blur rounded-xl py-3 text-center">
+                <p class="text-xl font-bold">1,286</p>
+                <p class="text-[10px] text-blue-200">在押人数</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl py-3 text-center">
+                <p class="text-xl font-bold">48</p>
+                <p class="text-[10px] text-blue-200">在岗民警</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl py-3 text-center">
+                <p class="text-xl font-bold">12</p>
+                <p class="text-[10px] text-blue-200">流动中</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl py-3 text-center relative">
+                <p class="text-xl font-bold text-red-300">3</p>
+                <p class="text-[10px] text-blue-200">待处理预警</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-4 -mt-2 space-y-4">
+        <!-- 预警信息看板 -->
+        <div class="card rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-triangle-exclamation text-red-500"></i>
+                    预警信息
+                </h3>
+                <a href="pages/alert/list.html" class="text-xs text-blue-600 font-medium">全部 <i class="fas fa-chevron-right text-[10px]"></i></a>
+            </div>
+            <div class="space-y-2">
+                <a href="pages/alert/detail.html" class="alert-item flex items-center gap-3 p-3 rounded-xl alert-urgent">
+                    <div class="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-exclamation text-red-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">1-2监区异常聚集预警</p>
+                        <p class="text-xs text-gray-500">2分钟前 · 2号车间</p>
+                    </div>
+                    <span class="tag-label tag-urgent flex-shrink-0">紧急</span>
+                </a>
+                <a href="pages/alert/detail.html" class="alert-item flex items-center gap-3 p-3 rounded-xl alert-important">
+                    <div class="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-exclamation text-orange-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">3监区攀爬行为预警</p>
+                        <p class="text-xs text-gray-500">8分钟前 · 3号车间</p>
+                    </div>
+                    <span class="tag-label tag-important flex-shrink-0">重要</span>
+                </a>
+                <a href="pages/alert/detail.html" class="alert-item flex items-center gap-3 p-3 rounded-xl alert-normal">
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-info text-blue-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">5监区离岗超时预警</p>
+                        <p class="text-xs text-gray-500">15分钟前 · 洗手间</p>
+                    </div>
+                    <span class="tag-label tag-normal flex-shrink-0">一般</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 点名汇总 -->
+        <div class="card rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-clipboard-check text-blue-600"></i>
+                    点名汇总
+                </h3>
+                <a href="pages/call/result.html" class="text-xs text-blue-600 font-medium">详情 <i class="fas fa-chevron-right text-[10px]"></i></a>
+            </div>
+            <div class="grid grid-cols-4 gap-2 mb-3">
+                <div class="text-center p-2.5 rounded-xl bg-blue-50">
+                    <p class="text-lg font-bold stat-gradient">8</p>
+                    <p class="text-[10px] text-gray-500">监区总数</p>
+                </div>
+                <div class="text-center p-2.5 rounded-xl bg-green-50">
+                    <p class="text-lg font-bold stat-gradient" style="--stat-gradient: linear-gradient(145deg, #059669 0%, #10b981 100%)">6</p>
+                    <p class="text-[10px] text-gray-500">已完成</p>
+                </div>
+                <div class="text-center p-2.5 rounded-xl bg-yellow-50">
+                    <p class="text-lg font-bold stat-gradient" style="--stat-gradient: linear-gradient(145deg, #d97706 0%, #eab308 100%)">1</p>
+                    <p class="text-[10px] text-gray-500">进行中</p>
+                </div>
+                <div class="text-center p-2.5 rounded-xl bg-red-50">
+                    <p class="text-lg font-bold stat-gradient" style="--stat-gradient: linear-gradient(145deg, #dc2626 0%, #ef4444 100%)">1</p>
+                    <p class="text-[10px] text-gray-500">未开始</p>
+                </div>
+            </div>
+            <!-- 进度条 -->
+            <div>
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                    <span>整体完成率</span>
+                    <span class="font-medium text-gray-700">92%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 92%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-bolt text-amber-500"></i>
+                快捷入口
+            </h3>
+            <div class="menu-grid grid grid-cols-4 gap-3">
+                <a href="pages/flow/apply.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-person-walking-with-cane text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">流动申请</span>
+                </a>
+                <a href="pages/flow/approve.html" class="card flex flex-col items-center py-3 rounded-xl relative">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-clipboard-check text-xl"></i>
+                    </div>
+                    <span class="absolute top-1.5 right-2 msg-badge">3</span>
+                    <span class="text-xs text-gray-600">流动审批</span>
+                </a>
+                <a href="pages/call/plan.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-calendar-plus text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">点名任务</span>
+                </a>
+                <a href="pages/person/search.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">人员查询</span>
+                </a>
+                <a href="pages/alert/list.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-bell text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">预警中心</span>
+                </a>
+                <a href="pages/psy/watchlist.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-heart-pulse text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">心理感知</span>
+                </a>
+                <a href="pages/flow/list.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-list-check text-xl"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">流动记录</span>
+                </a>
+                <a href="pages/msg/list.html" class="card flex flex-col items-center py-3 rounded-xl relative">
+                    <div class="menu-icon w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <span class="absolute top-1.5 right-2 msg-badge">8</span>
+                    <span class="text-xs text-gray-600">消息中心</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 滚动通知 -->
+        <div class="card rounded-2xl px-4 py-3 flex items-center gap-3 overflow-hidden">
+            <i class="fas fa-bullhorn text-amber-500 flex-shrink-0"></i>
+            <div class="flex-1 overflow-hidden">
+                <div class="whitespace-nowrap overflow-hidden">
+                    <p class="text-xs text-gray-600 notice-scroll inline-block">【系统通知】今日15:00将进行全监区联合点名演练，请各监区做好准备。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-2"></div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="home.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-home text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="pages/flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-person-walking-with-cane text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="pages/alert/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-bell text-lg"></i>
+            </div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">3</span>
+            <span class="text-[11px] mt-1">预警</span>
+        </a>
+        <a href="pages/msg/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-envelope text-lg"></i>
+            </div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">8</span>
+            <span class="text-[11px] mt-1">消息</span>
+        </a>
+        <a href="pages/profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const el = document.getElementById('timeDisplay');
+            if (el) el.textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+    </script>
+</body>
+</html>

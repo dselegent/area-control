@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>预警详情 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2874a6; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .app-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .alert-header { background: linear-gradient(145deg, #dc2626 0%, #b91c1c 100%); }
+
+        .person-item { transition: all 0.2s; }
+        .person-item:active { background: #f1f5f9; }
+
+        .action-btn { transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.98); }
+
+        .modal-card { background: #fff; border-radius: 24px 24px 0 0; }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="list.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">预警详情</h1>
+        <button class="text-white/80"><i class="fas fa-ellipsis-v text-lg"></i></button>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 预警头部 -->
+        <div class="alert-header rounded-2xl p-4 text-white">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-full">紧急</span>
+                <span class="text-xs text-red-200">异常聚集</span>
+            </div>
+            <h2 class="text-lg font-bold">1-2监区 · 2号车间异常聚集</h2>
+            <p class="text-xs text-red-200 mt-1">2026-05-21 21:02:35</p>
+            <div class="flex items-center gap-4 mt-3 text-xs text-red-200">
+                <span><i class="fas fa-map-marker-alt mr-1"></i>2号车间东侧</span>
+                <span><i class="fas fa-clock mr-1"></i>持续 3分22秒</span>
+            </div>
+        </div>
+
+        <!-- AI截图 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">
+                <i class="fas fa-robot text-purple-500 mr-2"></i>AI分析截图
+            </h3>
+            <div class="bg-gray-100 rounded-xl h-48 flex items-center justify-center">
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-video text-3xl mb-2"></i>
+                    <p class="text-xs">监控画面截图</p>
+                    <p class="text-xs">通道: CAM-02-03</p>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-3">
+                <button class="flex-1 bg-gray-100 rounded-xl py-2.5 text-xs text-gray-600 flex items-center justify-center gap-1">
+                    <i class="fas fa-play"></i>回放视频
+                </button>
+                <button class="flex-1 bg-gray-100 rounded-xl py-2.5 text-xs text-gray-600 flex items-center justify-center gap-1">
+                    <i class="fas fa-expand"></i>全屏查看
+                </button>
+            </div>
+        </div>
+
+        <!-- 涉及人员 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">涉及人员</h3>
+            <div class="space-y-2">
+                <a href="#" class="person-item flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">王某某</span>
+                            <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">高风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0201 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="#" class="person-item flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">李某某</span>
+                            <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">中风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0128 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="#" class="person-item flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1">
+                        <span class="text-sm font-medium text-gray-800">张某某</span>
+                        <p class="text-xs text-gray-400">430100-0105 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- AI判断 -->
+        <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-robot text-purple-500"></i>
+                <h3 class="text-sm font-semibold text-purple-700">AI判断</h3>
+            </div>
+            <p class="text-xs text-purple-600">检测到3人在2号车间东侧聚集，持续超过2分钟，存在异常聚集风险。建议立即派人现场核实。</p>
+            <div class="flex gap-2 mt-3">
+                <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">置信度 92%</span>
+                <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">模型 V3.2</span>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="grid grid-cols-2 gap-3">
+            <button class="action-btn bg-white border border-gray-200 text-gray-700 rounded-2xl py-3.5 text-sm font-medium flex items-center justify-center gap-2">
+                <i class="fas fa-share text-blue-500"></i>转派
+            </button>
+            <button onclick="showConfirmModal()" class="action-btn bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl py-3.5 text-sm font-medium shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-check"></i>确认处置
+            </button>
+        </div>
+
+        <!-- 标记误报 -->
+        <button onclick="markFalse()" class="w-full text-gray-400 text-xs py-3 flex items-center justify-center gap-1">
+            <i class="fas fa-times-circle"></i>标记为AI误报
+        </button>
+
+        <div class="h-4"></div>
+    </div>
+
+    <!-- 处置确认弹窗 -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
+        <div class="modal-card w-full p-6 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-4">处置填报</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">处置结果</label>
+                    <select class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50">
+                        <option>现场已核实，无异常</option>
+                        <option>已现场处置</option>
+                        <option>已转派处理</option>
+                        <option>其他</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">处置说明</label>
+                    <textarea class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none resize-none bg-gray-50" rows="3" placeholder="请描述处置情况..."></textarea>
+                </div>
+                <button class="w-full bg-gray-100 rounded-xl py-3 text-sm text-gray-600 flex items-center justify-center gap-2">
+                    <i class="fas fa-camera text-gray-400"></i>拍照附件
+                </button>
+                <button onclick="hideConfirmModal()" class="action-btn w-full bg-blue-600 text-white rounded-xl py-3.5 font-medium text-sm">提交处置</button>
+                <button onclick="hideConfirmModal()" class="w-full text-gray-500 py-3 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showConfirmModal() { document.getElementById('confirmModal').classList.remove('hidden'); }
+        function hideConfirmModal() { document.getElementById('confirmModal').classList.add('hidden'); }
+        function markFalse() {
+            if (confirm('确认标记为AI误报？将反馈至模型优化。')) alert('已标记为误报');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>人员详情 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2874a6; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .app-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .info-card { transition: all 0.2s; }
+        .info-card:active { background: #f1f5f9; }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="search.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">人员详情</h1>
+        <button class="text-white/80"><i class="fas fa-ellipsis-v text-lg"></i></button>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 基本信息 -->
+        <div class="app-card rounded-2xl p-4">
+            <div class="flex gap-4">
+                <div class="w-20 h-24 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div class="text-center text-gray-400">
+                        <i class="fas fa-user text-3xl"></i>
+                        <p class="text-xs mt-1">照片</p>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-bold text-gray-800">张某某</h3>
+                        <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">低风险</span>
+                    </div>
+                    <div class="text-xs text-gray-500 space-y-1.5">
+                        <p><span class="text-gray-400 w-14 inline-block">编号</span>430100-0105</p>
+                        <p><span class="text-gray-400 w-14 inline-block">监区</span>1-2监区</p>
+                        <p><span class="text-gray-400 w-14 inline-block">罪名</span>盗窃罪</p>
+                        <p><span class="text-gray-400 w-14 inline-block">刑期</span>2023.06 - 2026.06</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+                <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">低风险</span>
+                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">短刑期</span>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">改造积极</span>
+            </div>
+        </div>
+
+        <!-- 快捷信息 -->
+        <div class="app-card rounded-2xl p-4 grid grid-cols-4 gap-2">
+            <div class="info-card text-center p-3 rounded-xl">
+                <i class="fas fa-heartbeat text-red-500 text-xl"></i>
+                <p class="text-xs text-gray-500 mt-1.5">心理风险</p>
+            </div>
+            <div class="info-card text-center p-3 rounded-xl">
+                <i class="fas fa-clipboard-list text-blue-500 text-xl"></i>
+                <p class="text-xs text-gray-500 mt-1.5">考核记录</p>
+            </div>
+            <div class="info-card text-center p-3 rounded-xl">
+                <i class="fas fa-map-marker-alt text-green-500 text-xl"></i>
+                <p class="text-xs text-gray-500 mt-1.5">当前位置</p>
+            </div>
+            <div class="info-card text-center p-3 rounded-xl">
+                <i class="fas fa-clock text-purple-500 text-xl"></i>
+                <p class="text-xs text-gray-500 mt-1.5">通行记录</p>
+            </div>
+        </div>
+
+        <!-- 省局数据 -->
+        <div class="app-card rounded-2xl p-4">
+            <h4 class="text-sm font-semibold text-gray-800 mb-4">
+                <i class="fas fa-database text-blue-500 mr-2"></i>省局数据
+            </h4>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-3">
+                    <span class="text-gray-500">本月考核分</span>
+                    <span class="font-medium text-gray-800">92分</span>
+                </div>
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-3">
+                    <span class="text-gray-500">近期会见</span>
+                    <span class="font-medium text-gray-800">5天前</span>
+                </div>
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-3">
+                    <span class="text-gray-500">本月消费</span>
+                    <span class="font-medium text-gray-800">280元</span>
+                </div>
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-3">
+                    <span class="text-gray-500">奖惩记录</span>
+                    <span class="font-medium text-green-600">1次表扬</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 基础信息 -->
+        <div class="app-card rounded-2xl p-4">
+            <h4 class="text-sm font-semibold text-gray-800 mb-4">基础信息</h4>
+            <div class="space-y-0 text-xs">
+                <div class="flex justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400">性别</span>
+                    <span class="text-gray-800">男</span>
+                </div>
+                <div class="flex justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400">年龄</span>
+                    <span class="text-gray-800">32岁</span>
+                </div>
+                <div class="flex justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400">入监日期</span>
+                    <span class="text-gray-800">2023-06-15</span>
+                </div>
+                <div class="flex justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400">所在监室</span>
+                    <span class="text-gray-800">1-2监区 203室</span>
+                </div>
+                <div class="flex justify-between py-2.5">
+                    <span class="text-gray-400">责任民警</span>
+                    <span class="text-gray-800">张警官</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-4"></div>
+    </div>
+</body>
+</html>

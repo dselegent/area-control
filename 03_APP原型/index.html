@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-dark: #154360;
+            --accent: #3498db;
+            --glow: #5dade2;
+        }
+
+        * {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 深邃科技背景 */
+        body {
+            background:
+                radial-gradient(ellipse at top right, #1e5f8a 0%, #154360 40%, #0a1628 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 动态网格纹理 */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(52,152,219,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,152,219,0.06) 1px, transparent 1px);
+            background-size: 35px 35px;
+            animation: gridPulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* 顶部光晕 */
+        body::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(52,152,219,0.2) 0%, transparent 70%);
+            filter: blur(40px);
+            pointer-events: none;
+        }
+
+        /* 登录卡片 - 精抛玻璃 */
+        .login-card {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow:
+                0 20px 40px -12px rgba(0,0,0,0.35),
+                0 0 80px -20px rgba(52,152,219,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(26,82,118,0.3), transparent);
+        }
+
+        /* 输入框样式 */
+        .input-field {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            transition: all 0.25s ease;
+        }
+
+        .input-field:focus {
+            background: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.1), 0 4px 12px rgba(52,152,219,0.12);
+        }
+
+        /* 主登录按钮 */
+        .btn-login {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-login:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 20px rgba(26,82,118,0.35);
+        }
+
+        /* 生物识别按钮 */
+        .bio-btn {
+            background: linear-gradient(145deg, #fefefe 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.25s ease;
+        }
+
+        .bio-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.97);
+        }
+
+        .bio-btn i {
+            background: linear-gradient(145deg, #1a5276 0%, #3498db 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 图标增强 */
+        .logo-icon {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 50%, #154360 100%);
+            box-shadow:
+                0 8px 32px rgba(26,82,118,0.4),
+                0 0 50px -15px rgba(52,152,219,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        /* 分割线 */
+        .divider-line {
+            background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+        }
+
+        /* 徽章 */
+        .badge {
+            position: relative;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+    <!-- 顶部装饰 -->
+    <div class="pt-14 pb-10 px-6 text-center relative">
+        <div class="logo-icon w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 shadow-lg relative">
+            <i class="fas fa-shield-halved text-white text-3xl"></i>
+            <!-- 角落高光 -->
+            <div class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-white/30 rounded-tr"></div>
+        </div>
+        <h1 class="text-xl font-semibold text-white tracking-wide">湖南省监狱AI区域管控系统</h1>
+        <div class="flex items-center justify-center gap-2 mt-2">
+            <p class="text-sm text-blue-200/70 font-light">执勤干警移动终端</p>
+        </div>
+    </div>
+
+    <!-- 登录表单 -->
+    <div class="flex-1 px-6 pb-6">
+        <div class="login-card rounded-3xl p-6 shadow-xl">
+            <h2 class="text-base font-semibold text-gray-800 mb-5 flex items-center gap-2">
+                <i class="fas fa-sign-in-alt text-gray-400"></i>
+                账号登录
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">用户名</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" class="input-field w-full pl-11 pr-4 py-3.5 border rounded-xl text-sm outline-none" placeholder="请输入警号或用户名">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">密码</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="password" class="input-field w-full pl-11 pr-11 py-3.5 border rounded-xl text-sm outline-none" placeholder="请输入密码">
+                        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-2 text-gray-500 cursor-pointer">
+                        <input type="checkbox" checked class="w-4 h-4 text-blue-600 rounded border-gray-300">
+                        <span>记住登录</span>
+                    </label>
+                    <a href="#" class="text-blue-600 font-medium">忘记密码？</a>
+                </div>
+                <button onclick="doLogin(this)" class="btn-login w-full py-3.5 rounded-xl text-white font-medium text-sm shadow-lg flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    登 录
+                </button>
+            </div>
+
+            <!-- 分隔线 -->
+            <div class="flex items-center gap-4 my-6">
+                <div class="flex-1 h-px divider-line"></div>
+                <span class="text-xs text-gray-400 uppercase tracking-wider">其他登录方式</span>
+                <div class="flex-1 h-px divider-line"></div>
+            </div>
+
+            <!-- 生物识别登录 -->
+            <div class="grid grid-cols-2 gap-3">
+                <button class="bio-btn flex items-center justify-center gap-2 rounded-xl py-3.5">
+                    <i class="fas fa-fingerprint text-lg"></i>
+                    <span class="text-sm text-gray-700">指纹登录</span>
+                </button>
+                <button class="bio-btn flex items-center justify-center gap-2 rounded-xl py-3.5">
+                    <i class="fas fa-face-smile text-lg"></i>
+                    <span class="text-sm text-gray-700">人脸登录</span>
+                </button>
+            </div>
+
+            <!-- 设备绑定状态 -->
+            <div class="mt-5 flex items-center justify-center gap-2 text-xs text-gray-400">
+                <i class="fas fa-mobile-screen-button"></i>
+                <span>设备已绑定: HN-PHONE-028</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="px-6 py-6 text-center relative">
+        <p class="text-xs text-blue-200/40">© 2026 湖南省监狱管理局</p>
+        <div class="flex items-center justify-center gap-3 mt-1">
+            <span class="text-xs text-blue-200/30 flex items-center gap-1">
+                <i class="fas fa-shield-halved text-[10px]"></i>
+                等保三级
+            </span>
+            <span class="w-px h-2 bg-white/10"></span>
+            <span class="text-xs text-blue-200/30 flex items-center gap-1">
+                <i class="fas fa-lock text-[10px]"></i>
+                数据加密传输
+            </span>
+        </div>
+    </div>
+
+    <script>
+        function doLogin(btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span>登录中...';
+            btn.disabled = true;
+            btn.classList.add('opacity-80');
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 1200);
+        }
+    </script>
+</body>
+</html>

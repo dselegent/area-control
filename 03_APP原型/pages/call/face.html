@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>人脸点名 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .cam-frame { border: 3px solid var(--primary); border-radius: 20px; overflow: hidden; position: relative; }
+        .cam-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+        .success-card { background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%); }
+
+        .log-item { transition: all 0.2s; }
+        .log-item:active { background: #f1f5f9; }
+
+        .stat-box { transition: all 0.2s; }
+        .stat-box:active { transform: scale(0.95); }
+
+        .modal-card { background: #fff; border-radius: 24px 24px 0 0; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="task.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">人脸点名</h1>
+        <div class="flex items-center gap-2 text-xs text-green-300">
+            <i class="fas fa-circle text-[8px] animate-pulse"></i>
+            <span>识别中</span>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 摄像头预览 -->
+        <div class="cam-frame aspect-[4/3] bg-gray-900 relative">
+            <video autoplay playsinline class="w-full h-full object-cover"></video>
+            <canvas class="absolute inset-0 w-full h-full"></canvas>
+            <div class="cam-overlay flex items-center justify-center">
+                <div class="w-48 h-48 border-2 border-white/50 rounded-full"></div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center">
+                <p class="text-white text-xs bg-black/50 px-3 py-1 rounded-full inline">将人脸对准框内</p>
+            </div>
+        </div>
+
+        <!-- 测试按钮 -->
+        <div class="flex gap-2">
+            <button onclick="triggerMatch()" class="flex-1 bg-green-500 text-white rounded-xl py-2 text-xs font-medium">
+                <i class="fas fa-check-circle mr-1"></i>测试：成功
+            </button>
+            <button onclick="triggerMismatch()" class="flex-1 bg-orange-500 text-white rounded-xl py-2 text-xs font-medium">
+                <i class="fas fa-times-circle mr-1"></i>测试：失败
+            </button>
+        </div>
+
+        <!-- 统计 -->
+        <div class="grid grid-cols-4 gap-2">
+            <div class="stat-box text-center p-2.5 bg-blue-50 rounded-xl">
+                <p class="text-lg font-bold text-blue-600">182</p>
+                <p class="text-[10px] text-gray-500">已点名</p>
+            </div>
+            <div class="stat-box text-center p-2.5 bg-orange-50 rounded-xl">
+                <p class="text-lg font-bold text-orange-500">4</p>
+                <p class="text-[10px] text-gray-500">未点名</p>
+            </div>
+            <div class="stat-box text-center p-2.5 bg-purple-50 rounded-xl">
+                <p class="text-lg font-bold text-purple-500">3</p>
+                <p class="text-[10px] text-gray-500">流动中</p>
+            </div>
+            <div class="stat-box text-center p-2.5 bg-green-50 rounded-xl">
+                <p class="text-lg font-bold text-green-600">98%</p>
+                <p class="text-[10px] text-gray-500">完成率</p>
+            </div>
+        </div>
+
+        <!-- 已点名日志 -->
+        <div class="bg-white rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold text-gray-800">已点名 (<span id="logCount">5</span>)</h3>
+                <span class="text-xs text-gray-400">实时更新</span>
+            </div>
+            <div class="space-y-2" id="logList">
+                <div class="log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">王某某</p>
+                        <p class="text-xs text-gray-400">430100-0128</p>
+                    </div>
+                    <span class="text-xs text-green-600 font-medium">已点</span>
+                </div>
+                <div class="log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">张某某</p>
+                        <p class="text-xs text-gray-400">430100-0105</p>
+                    </div>
+                    <span class="text-xs text-green-600 font-medium">已点</span>
+                </div>
+                <div class="log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">刘某某</p>
+                        <p class="text-xs text-gray-400">430100-0112</p>
+                    </div>
+                    <span class="text-xs text-green-600 font-medium">已点</span>
+                </div>
+                <div class="log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">陈某某</p>
+                        <p class="text-xs text-gray-400">430100-0089</p>
+                    </div>
+                    <span class="text-xs text-green-600 font-medium">已点</span>
+                </div>
+                <div class="log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">赵某某</p>
+                        <p class="text-xs text-gray-400">430100-0056</p>
+                    </div>
+                    <span class="text-xs text-green-600 font-medium">已点</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 识别成功弹窗 -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="success-card text-white rounded-2xl p-6 w-full max-w-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-3xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-lg font-bold">识别成功</p>
+                    <p class="text-sm text-green-100">王某某</p>
+                    <p class="text-xs text-green-200">编号 430100-0128</p>
+                </div>
+            </div>
+            <div class="mt-4 text-center">
+                <p class="text-xs text-green-200">1-2监区 - 21:02:35</p>
+            </div>
+            <button onclick="closeSuccessModal()" class="mt-4 w-full bg-white text-green-600 rounded-xl py-3 font-semibold text-sm">
+                确认
+            </button>
+        </div>
+    </div>
+
+    <!-- 未匹配弹窗 -->
+    <div id="failModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="modal-card w-full p-6 pb-8 max-h-[80vh] overflow-y-auto">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-orange-100 flex items-center justify-center mb-3">
+                    <i class="fas fa-exclamation-triangle text-orange-500 text-2xl"></i>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800">未匹配到人员</h3>
+                <p class="text-xs text-gray-400 mt-1">请从以下未点人员中选择关联</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="matchPerson('周某某','430100-0156')" class="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <p class="text-sm font-medium text-gray-800">周某某</p>
+                        <p class="text-xs text-gray-400">430100-0156 外就医</p>
+                    </div>
+                    <i class="fas fa-plus text-gray-400"></i>
+                </button>
+                <button onclick="matchPerson('钱某某','430100-0178')" class="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <p class="text-sm font-medium text-gray-800">钱某某</p>
+                        <p class="text-xs text-gray-400">430100-0178</p>
+                    </div>
+                    <i class="fas fa-plus text-gray-400"></i>
+                </button>
+                <button onclick="matchPerson('孙某某','430100-0203')" class="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <p class="text-sm font-medium text-gray-800">孙某某</p>
+                        <p class="text-xs text-gray-400">430100-0203</p>
+                    </div>
+                    <i class="fas fa-plus text-gray-400"></i>
+                </button>
+                <button onclick="matchPerson('吴某某','430100-0215')" class="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <p class="text-sm font-medium text-gray-800">吴某某</p>
+                        <p class="text-xs text-gray-400">430100-0215</p>
+                    </div>
+                    <i class="fas fa-plus text-gray-400"></i>
+                </button>
+            </div>
+            <button onclick="closeFailModal()" class="mt-4 w-full bg-gray-100 text-gray-600 rounded-xl py-3 text-sm">取消</button>
+        </div>
+    </div>
+
+    <!-- 关联成功弹窗 -->
+    <div id="matchModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="success-card text-white rounded-2xl p-6 w-full max-w-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-link text-2xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-lg font-bold">已关联</p>
+                    <p id="matchName" class="text-sm text-green-100"></p>
+                    <p id="matchId" class="text-xs text-green-200"></p>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button onclick="retryFace()" class="flex-1 bg-white/20 text-white rounded-xl py-2 text-sm">继续识别</button>
+                <button onclick="closeMatchModal()" class="flex-1 bg-white text-green-600 rounded-xl py-2 text-sm font-medium">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logCount = 5;
+
+        function triggerMatch() { showSuccessModal(); }
+        function triggerMismatch() { showFailModal(); }
+
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.remove('hidden');
+            addLog('王某某', '430100-0128');
+        }
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function showFailModal() {
+            document.getElementById('failModal').classList.remove('hidden');
+        }
+        function closeFailModal() {
+            document.getElementById('failModal').classList.add('hidden');
+        }
+
+        function matchPerson(name, id) {
+            document.getElementById('matchName').textContent = name;
+            document.getElementById('matchId').textContent = '编号 ' + id;
+            document.getElementById('failModal').classList.add('hidden');
+            document.getElementById('matchModal').classList.remove('hidden');
+            addLog(name, id);
+        }
+        function closeMatchModal() {
+            document.getElementById('matchModal').classList.add('hidden');
+        }
+        function retryFace() { closeMatchModal(); }
+
+        function addLog(name, id) {
+            logCount++;
+            const logList = document.getElementById('logList');
+            const div = document.createElement('div');
+            div.className = 'log-item flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-200';
+            div.innerHTML = '<div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><i class="fas fa-check text-green-500 text-xs"></i></div><div class="flex-1"><p class="text-sm font-medium text-gray-800">' + name + '</p><p class="text-xs text-gray-400">' + id + '</p></div><span class="text-xs text-green-600 font-medium">已点</span>';
+            logList.insertBefore(div, logList.firstChild);
+            document.getElementById('logCount').textContent = logCount;
+        }
+    </script>
+</body>
+</html>

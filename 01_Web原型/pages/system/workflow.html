@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>审批流程配置 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .modal { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .workflow-card { transition: all 0.2s; cursor: pointer; }
+        .workflow-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .flow-node { position: relative; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .flow-node::after { content: ''; position: absolute; top: 50%; right: -24px; width: 20px; height: 2px; background: #3b82f6; }
+        .flow-node:last-child::after { display: none; }
+        .status-active { background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .status-inactive { background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    
+        /* 自定义滚动条 */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div><div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div></div></div>
+                        <nav id="sidebarNav" class="flex-1 overflow-y-auto py-4 scrollbar-thin">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-chart-pie w-5"></i><span>数据可视化</span></a>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">人员管理</div>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">流动管控</div>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../flow/execute.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-running w-5"></i><span>流动执行</span></a>
+                <a href="../flow/track.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-location-dot w-5"></i><span>实时追踪</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">点名管理</div>
+                <a href="../call/plan.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>点名计划</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>点名记录</span></a>
+                <a href="../call/report.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>点名报告</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700"><div class="flex items-center gap-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600"><div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div><a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a></div></div>
+        </aside>
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600"><i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>系统管理</span><span class="text-gray-400">/</span><span class="text-gray-800">审批流程配置</span></div>
+                <div class="flex items-center gap-4"><span class="text-sm text-gray-500" id="currentTime"></span><button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button></div>
+            </header>
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">流程模板总数</p><p class="text-2xl font-bold text-gray-800 mt-1">12</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">已启用</p><p class="text-2xl font-bold text-green-500 mt-1">10</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">已停用</p><p class="text-2xl font-bold text-gray-400 mt-1">2</p></div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-sm text-gray-500">本月审批量</p><p class="text-2xl font-bold text-blue-500 mt-1">486</p></div>
+                </div>
+                <!-- 操作栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <button onclick="showAdd()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-plus mr-1"></i>新建流程模板</button>
+                        <div class="flex items-center gap-2">
+                            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"><option>全部类型</option><option>零星流动</option><option>属性变更</option><option>外出审批</option></select>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500"><option>全部状态</option><option>已启用</option><option>已停用</option></select>
+                        </div>
+                    </div>
+                </div>
+                <!-- 流程模板卡片 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- 流程1 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-walking text-blue-500 mr-2"></i>零星流动审批</h4>
+                            <span class="status-active">已启用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">罪犯零星外出流动申请审批流程</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">监区民警</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">监区审核</p><p class="text-xs text-gray-500">监区领导</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">狱政科审批</p><p class="text-xs text-gray-500">狱政科长</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">指挥中心</p><p class="text-xs text-gray-500">值班指挥</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>本月审批: 156</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showEdit()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-edit mr-1"></i>编辑</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停用</button>
+                        </div>
+                    </div>
+                    <!-- 流程2 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-user-edit text-purple-500 mr-2"></i>属性变更审批</h4>
+                            <span class="status-active">已启用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">罪犯特殊属性(严管/禁闭/集训)变更审批</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">监区民警</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">监区审核</p><p class="text-xs text-gray-500">监区领导</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">狱政科审批</p><p class="text-xs text-gray-500">狱政科长</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>本月审批: 89</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showEdit()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-edit mr-1"></i>编辑</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停用</button>
+                        </div>
+                    </div>
+                    <!-- 流程3 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-hospital text-red-500 mr-2"></i>外出就医审批</h4>
+                            <span class="status-active">已启用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">罪犯外出就医/住院审批流程(加急通道)</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">监区民警</p></div>
+                            <div class="flow-node flex-shrink-0 bg-red-50 border-red-200"><p class="text-xs font-medium text-red-800">狱政科审批</p><p class="text-xs text-red-500">加急通道</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">指挥中心</p><p class="text-xs text-gray-500">值班指挥</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">监狱领导</p><p class="text-xs text-gray-500">分管领导</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>本月审批: 23</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showEdit()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-edit mr-1"></i>编辑</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停用</button>
+                        </div>
+                    </div>
+                    <!-- 流程4 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-graduation-cap text-green-500 mr-2"></i>教育学习审批</h4>
+                            <span class="status-active">已启用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">罪犯监内教育学习活动审批流程</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">教育科</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">监区确认</p><p class="text-xs text-gray-500">监区领导</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">指挥中心</p><p class="text-xs text-gray-500">值班指挥</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>本月审批: 67</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showEdit()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-edit mr-1"></i>编辑</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停用</button>
+                        </div>
+                    </div>
+                    <!-- 流程5 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-phone text-yellow-500 mr-2"></i>亲情电话审批</h4>
+                            <span class="status-active">已启用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">罪犯亲情电话申请审批流程</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">监区民警</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">监区审核</p><p class="text-xs text-gray-500">监区领导</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>本月审批: 112</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="showEdit()" class="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-edit mr-1"></i>编辑</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-stop mr-1"></i>停用</button>
+                        </div>
+                    </div>
+                    <!-- 流程6 - 已停用 -->
+                    <div class="workflow-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 opacity-60">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800"><i class="fas fa-utensils text-gray-400 mr-2"></i>送餐送货审批</h4>
+                            <span class="status-inactive">已停用</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">监内送餐送货流动审批(已合并至零星流动)</p>
+                        <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">发起申请</p><p class="text-xs text-gray-500">后勤科</p></div>
+                            <div class="flow-node flex-shrink-0"><p class="text-xs font-medium text-gray-800">指挥中心</p><p class="text-xs text-gray-500">值班指挥</p></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>适用监区: 全部</span>
+                            <span>停用日期: 2026-04-01</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button class="flex-1 px-3 py-1.5 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100"><i class="fas fa-play mr-1"></i>启用</button>
+                            <button class="flex-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded text-xs hover:bg-gray-100"><i class="fas fa-copy mr-1"></i>复制</button>
+                            <button class="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"><i class="fas fa-trash mr-1"></i>删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新建/编辑流程弹窗 -->
+    <div class="modal" id="editModal">
+        <div class="bg-white rounded-xl shadow-xl w-[700px] max-h-[85vh] overflow-y-auto">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800"><i class="fas fa-edit text-blue-500 mr-2"></i>编辑审批流程</h3>
+                <button onclick="closeEdit()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm text-gray-600 mb-1">流程名称</label><input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="零星流动审批"></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">流程类型</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option selected>零星流动</option><option>属性变更</option><option>外出审批</option><option>其他</option></select></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">适用监区</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option selected>全部监区</option><option>一监区</option><option>二监区</option><option>三监区</option></select></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">超时提醒(分钟)</label><input type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" value="30"></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">流程说明</label><textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" rows="2">罪犯零星外出流动申请审批流程，支持加急和退回操作</textarea></div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-700">审批节点配置</label>
+                        <button class="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100"><i class="fas fa-plus mr-1"></i>添加节点</button>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs">1</span>
+                            <input type="text" class="flex-1 px-3 py-1.5 border border-gray-200 rounded text-sm" value="发起申请">
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option selected>监区民警</option><option>监区领导</option><option>狱政科</option></select>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>会签</option><option selected>或签</option></select>
+                            <button class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs">2</span>
+                            <input type="text" class="flex-1 px-3 py-1.5 border border-gray-200 rounded text-sm" value="监区审核">
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>监区民警</option><option selected>监区领导</option><option>狱政科</option></select>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>会签</option><option selected>或签</option></select>
+                            <button class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs">3</span>
+                            <input type="text" class="flex-1 px-3 py-1.5 border border-gray-200 rounded text-sm" value="狱政科审批">
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>监区民警</option><option>监区领导</option><option selected>狱政科</option></select>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>会签</option><option selected>或签</option></select>
+                            <button class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
+                            <input type="text" class="flex-1 px-3 py-1.5 border border-gray-200 rounded text-sm" value="指挥中心确认">
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>监区民警</option><option>监区领导</option><option>狱政科</option><option selected>指挥中心</option></select>
+                            <select class="px-3 py-1.5 border border-gray-200 rounded text-sm"><option>会签</option><option selected>或签</option></select>
+                            <button class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">退回规则</label><select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>退回到上一节点</option><option>退回到发起人</option><option>自定义退回节点</option></select></div>
+                <div><label class="block text-sm text-gray-600 mb-1">加急条件</label><div class="flex gap-2 mt-1"><label class="flex items-center gap-1 text-sm"><input type="checkbox" checked class="rounded"> 外出就医</label><label class="flex items-center gap-1 text-sm"><input type="checkbox" checked class="rounded"> 紧急提审</label><label class="flex items-center gap-1 text-sm"><input type="checkbox" class="rounded"> 其他紧急情况</label></div></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeEdit()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button>
+                <button onclick="closeEdit()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存流程</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime(){const n=new Date();document.getElementById('currentTime').textContent=n.toLocaleString('zh-CN');}updateTime();setInterval(updateTime,1000);
+
+        // 导航栏滚动位置记忆
+        const SCROLL_KEY = 'sidebarNavScrollPos';
+        function saveScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem(SCROLL_KEY, sidebarNav.scrollTop);
+        }
+        function restoreScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (!sidebarNav) return;
+            const savedPos = localStorage.getItem(SCROLL_KEY);
+            if (savedPos !== null) {
+                requestAnimationFrame(() => {
+                    sidebarNav.scrollTop = parseInt(savedPos, 10);
+                });
+            }
+        }
+
+        // 页面即将离开时保存滚动位置
+        window.addEventListener('beforeunload', function() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem('sidebarNavScrollPos', sidebarNav.scrollTop);
+        });
+                                document.addEventListener('DOMContentLoaded', function() {
+            restoreScrollPosition();
+            // 高亮当前页面导航链接
+            // 获取当前页面路径键（用于导航高亮）
+            function getPathKey(url, href) {
+                const urlParts = url.split('/');
+                let currentDir = urlParts.slice(3, -1);
+                if (href === null || href === undefined || href === '') {
+                    return currentDir.concat([urlParts[urlParts.length - 1]]).join('/');
+                }
+                const linkParts = href.split('/');
+                for (let i = 0; i < linkParts.length - 1; i++) {
+                    const part = linkParts[i];
+                    if (part === '..') currentDir.pop();
+                    else if (part && part !== '.') currentDir.push(part);
+                }
+                const filename = linkParts[linkParts.length - 1];
+                currentDir.push(filename);
+                return currentDir.join('/');
+            }
+            const currentPath = window.location.href;
+            const currentKey = getPathKey(currentPath, currentPath.split("/").pop());
+            document.querySelectorAll('#sidebarNav a').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                const linkKey = getPathKey(currentPath, linkHref);
+                if (linkKey === currentKey) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+                // Using beforeunload for scroll position
+            });
+        });
+
+        function showEdit(){document.getElementById('editModal').classList.add('active');}
+        function closeEdit(){document.getElementById('editModal').classList.remove('active');}
+        function showAdd(){document.getElementById('editModal').classList.add('active');}
+        document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+    </script>
+</body>
+</html>

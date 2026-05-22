@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>执行点名 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .task-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .toggle-on { background: var(--primary); }
+        .toggle-on::after { right: 2px; }
+
+        .progress-ring { stroke: #e2e8f0; }
+        .progress-fill { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+        .face-btn { background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%); transition: all 0.2s; }
+        .face-btn:active { transform: scale(0.97); }
+
+        .success-box { background: #dcfce7; border: 1px solid #bbf7d0; }
+        .risk-box { background: #fee2e2; border: 1px solid #fecaca; }
+
+        .stat-box { transition: all 0.2s; cursor: pointer; }
+        .stat-box:active { transform: scale(0.95); }
+        .stat-checked { background: #dbeafe; }
+        .stat-uncheck { background: #ffedd5; }
+        .stat-away { background: #f3e8ff; }
+        .stat-in { background: #ccfbf1; }
+
+        .person-item { transition: all 0.2s; }
+        .person-item:active { background: #f1f5f9; }
+
+        .sync-tip { background: #dcfce7; color: #166534; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+        .tab-active .tab-icon { background: #dbeafe; }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">执行点名</h1>
+        <div class="flex items-center gap-2 text-xs text-white/80">
+            <i class="fas fa-wifi text-green-400"></i>
+            <span>在线</span>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 任务信息卡片 -->
+        <div class="task-card rounded-xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-800">1-2监区 · 晚间点名</h2>
+                    <p class="text-xs text-gray-400 mt-1">2026-05-21 21:00</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">剩余时间</p>
+                    <div id="countdown" class="text-xl font-bold text-red-500 font-mono">28:35</div>
+                </div>
+            </div>
+            <!-- 进度环 -->
+            <div class="flex items-center gap-4">
+                <a href="result.html" class="relative w-20 h-20 flex-shrink-0">
+                    <svg class="w-20 h-20" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" class="progress-ring" stroke-width="6"/>
+                        <circle cx="40" cy="40" r="34" fill="none" class="progress-fill" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="4"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-lg font-bold text-gray-800" id="progressPercent">98%</span>
+                    </div>
+                </a>
+                <div class="flex-1 grid grid-cols-2 gap-2">
+                    <a href="result.html" class="stat-box stat-checked rounded-lg p-2.5 text-center">
+                        <p class="text-xl font-bold" style="color:var(--primary)">182</p>
+                        <p class="text-xs text-gray-500">已点名</p>
+                    </a>
+                    <a href="result.html" class="stat-box stat-uncheck rounded-lg p-2.5 text-center">
+                        <p class="text-xl font-bold text-orange-500">4</p>
+                        <p class="text-xs text-gray-500">未点名</p>
+                    </a>
+                    <a href="result.html" class="stat-box stat-away rounded-lg p-2.5 text-center">
+                        <p class="text-xl font-bold text-purple-500">3</p>
+                        <p class="text-xs text-gray-500">流动中</p>
+                    </a>
+                    <a href="result.html" class="stat-box stat-in rounded-lg p-2.5 text-center">
+                        <p class="text-xl font-bold text-cyan-500">2</p>
+                        <p class="text-xs text-gray-500">他监流入</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 连续扫描开关 -->
+        <div class="task-card rounded-xl p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-qrcode text-blue-500 text-xl"></i>
+                <div>
+                    <p class="text-sm font-medium text-gray-800">连续扫描</p>
+                    <p class="text-xs text-gray-400">扫码后自动启动下一次识别</p>
+                </div>
+            </div>
+            <div id="scanToggle" class="w-11 h-6 rounded-full bg-blue-600 relative" onclick="toggleScan()">
+                <div class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow"></div>
+            </div>
+        </div>
+
+        <!-- 人脸点名按钮 -->
+        <a href="face.html" class="face-btn text-white rounded-2xl p-5 text-center shadow-lg block">
+            <i class="fas fa-face-smile text-4xl mb-2"></i>
+            <p class="text-base font-semibold">人脸点名</p>
+            <p class="text-xs text-green-100 mt-1">摄像头识别，自动同步</p>
+        </a>
+
+        <!-- 扫码结果提示 -->
+        <div id="scanResult" class="hidden success-box rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check text-green-500 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-green-800">点名成功</p>
+                    <p class="text-xs text-green-600">王某某 · 编号 430100-0128</p>
+                    <p class="text-xs text-gray-400 mt-1">1-2监区 · 21:02:35</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-green-200 flex items-center justify-center">
+                    <i class="fas fa-check-double text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 风险提醒 -->
+        <div id="riskAlert" class="hidden risk-box rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-red-800">风险人员提醒</p>
+                    <p class="text-xs text-red-600">李某某 · 高风险 · 涉暴力</p>
+                    <p class="text-xs text-gray-500 mt-1">请重点关注该人员状态</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近点名记录 -->
+        <div class="task-card rounded-xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">最近点名</h3>
+                <a href="result.html" class="text-xs text-blue-600 font-medium">查看全部</a>
+            </div>
+            <div class="space-y-2" id="recentList">
+                <a href="#" class="person-item flex items-center gap-3 p-2.5 rounded-lg">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">张某某</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">已点</span>
+                        </div>
+                        <p class="text-xs text-gray-400">编号 430100-0105 · 21:01</p>
+                    </div>
+                    <i class="fas fa-check text-green-500"></i>
+                </a>
+                <a href="#" class="person-item flex items-center gap-3 p-2.5 rounded-lg">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">刘某某</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">已点</span>
+                        </div>
+                        <p class="text-xs text-gray-400">编号 430100-0112 · 21:01</p>
+                    </div>
+                    <i class="fas fa-check text-green-500"></i>
+                </a>
+                <a href="#" class="person-item flex items-center gap-3 p-2.5 rounded-lg">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">陈某某</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">流动中</span>
+                        </div>
+                        <p class="text-xs text-gray-400">编号 430100-0089 · 系统判定</p>
+                    </div>
+                    <i class="fas fa-person-walking-with-cane text-yellow-500"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 自动同步提示 -->
+        <div class="sync-tip rounded-xl px-4 py-2.5 text-center text-sm">
+            <i class="fas fa-sync-alt mr-2"></i>人脸识别成功后自动同步，无需手动提交
+        </div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="task.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-clipboard-check text-lg"></i></div>
+            <span class="text-[11px] mt-1">点名</span>
+        </a>
+        <a href="../id-check/scan.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-qrcode text-lg"></i></div>
+            <span class="text-[11px] mt-1">扫码</span>
+        </a>
+        <a href="../flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-user text-lg"></i></div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        let seconds = 28 * 60 + 35;
+        let scanEnabled = true;
+
+        function updateCountdown() {
+            if (seconds <= 0) return;
+            seconds--;
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            document.getElementById('countdown').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+        setInterval(updateCountdown, 1000);
+
+        function toggleScan() {
+            scanEnabled = !scanEnabled;
+            const el = document.getElementById('scanToggle');
+            if (scanEnabled) {
+                el.classList.add('bg-blue-600');
+                el.classList.remove('bg-gray-200');
+                el.innerHTML = '<div class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow"></div>';
+            } else {
+                el.classList.remove('bg-blue-600');
+                el.classList.add('bg-gray-200');
+                el.innerHTML = '<div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow"></div>';
+            }
+        }
+
+        function startFace() {
+            setTimeout(() => {
+                document.getElementById('scanResult').classList.remove('hidden');
+                setTimeout(() => { document.getElementById('scanResult').classList.add('hidden'); }, 3000);
+            }, 800);
+        }
+    </script>
+</body>
+</html>

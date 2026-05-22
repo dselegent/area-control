@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>人员搜寻 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .target-card { background: linear-gradient(145deg, #ea580c 0%, #dc2626 100%); }
+
+        .action-btn { transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-found { background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%); }
+        .btn-notfound { background: linear-gradient(145deg, #dc2626 0%, #b91c1c 100%); }
+
+        .feature-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+        .feature-item { background: #f8fafc; border-radius: 10px; padding: 10px 12px; }
+
+        .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+        .tag-high { background: #fee2e2; color: #dc2626; }
+        .tag-violent { background: #ffedd5; color: #ea580c; }
+        .tag-selfharm { background: #fef9c3; color: #a16207; }
+
+        .progress-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+        .member-item { transition: all 0.2s; background: #f8fafc; border-radius: 12px; padding: 12px; }
+        .member-item:active { background: #f1f5f9; }
+
+        .map-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">人员搜寻</h1>
+        <div class="flex items-center gap-1 text-xs text-orange-300">
+            <i class="fas fa-search animate-pulse"></i>
+            <span>搜寻中</span>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 搜寻目标 -->
+        <div class="target-card rounded-xl p-4 text-white">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-full">搜寻任务</span>
+                <span class="text-xs text-orange-200">进行中 · 23分钟</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-20 rounded-xl bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-user text-2xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold">钱某某</h2>
+                    <p class="text-xs text-orange-200 mt-1">编号 430100-0178 · 1-2监区</p>
+                    <p class="text-xs text-orange-200">最后位置: 2号车间东侧 (21:02)</p>
+                </div>
+            </div>
+            <div class="mt-3 flex items-center gap-2 text-xs text-orange-200">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>点名未归队，需立即确认位置</span>
+            </div>
+        </div>
+
+        <!-- 搜寻操作 -->
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="confirmFound()" class="action-btn btn-found text-white rounded-xl p-4 text-center">
+                <i class="fas fa-check-circle text-3xl mb-2"></i>
+                <p class="text-sm font-semibold">确认找到</p>
+                <p class="text-xs text-green-100 mt-1">扫码/人脸确认</p>
+            </button>
+            <button onclick="confirmNotFound()" class="action-btn btn-notfound text-white rounded-xl p-4 text-center">
+                <i class="fas fa-times-circle text-3xl mb-2"></i>
+                <p class="text-sm font-semibold">未找到</p>
+                <p class="text-xs text-red-100 mt-1">上报当前位置</p>
+            </button>
+        </div>
+
+        <!-- 特征信息 -->
+        <div class="feature-card rounded-xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">人员特征</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="feature-item flex items-center gap-2">
+                    <i class="fas fa-shirt text-gray-400"></i><span class="text-xs text-gray-600">蓝色囚服</span>
+                </div>
+                <div class="feature-item flex items-center gap-2">
+                    <i class="fas fa-ruler text-gray-400"></i><span class="text-xs text-gray-600">172cm</span>
+                </div>
+                <div class="feature-item flex items-center gap-2">
+                    <i class="fas fa-weight-hanging text-gray-400"></i><span class="text-xs text-gray-600">中等</span>
+                </div>
+                <div class="feature-item flex items-center gap-2">
+                    <i class="fas fa-cut text-gray-400"></i><span class="text-xs text-gray-600">短发</span>
+                </div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <span class="tag tag-high">高风险</span>
+                <span class="tag tag-violent">涉暴力</span>
+                <span class="tag tag-selfharm">有自伤倾向</span>
+            </div>
+        </div>
+
+        <!-- 搜寻进度 -->
+        <div class="progress-card rounded-xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">搜寻小组进度</h3>
+                <span class="text-xs text-gray-400">3组搜寻中</span>
+            </div>
+            <div class="space-y-2">
+                <a href="#" class="member-item flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center"><i class="fas fa-user text-blue-600"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">张警官 (我)</p><p class="text-xs text-gray-400">2号车间</p></div>
+                    <span class="tag bg-blue-100 text-blue-600">搜寻中</span>
+                </a>
+                <a href="#" class="member-item flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fas fa-user text-gray-500"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">李警官</p><p class="text-xs text-gray-400">走廊及楼梯</p></div>
+                    <span class="tag bg-blue-100 text-blue-600">搜寻中</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 最后位置 -->
+        <div class="map-card rounded-xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">最后位置</h3>
+            <div class="bg-gray-100 rounded-xl h-40 flex items-center justify-center relative">
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-map-marked-alt text-3xl mb-2"></i>
+                    <p class="text-xs">2号车间东侧 · 21:02</p>
+                </div>
+                <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-gray-500">
+                    <i class="fas fa-location-arrow text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认找到弹窗 -->
+    <div id="foundModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-4">确认找到</h3>
+            <div class="space-y-3">
+                <div class="flex gap-3">
+                    <button class="flex-1 bg-green-500 text-white rounded-xl py-3 text-sm font-medium">扫码确认</button>
+                    <button class="flex-1 bg-blue-500 text-white rounded-xl py-3 text-sm font-medium">人脸确认</button>
+                </div>
+                <input type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm" value="2号车间东侧" readonly>
+                <textarea class="input-field w-full px-4 py-3 rounded-xl text-sm resize-none" rows="2" placeholder="描述现场情况..."></textarea>
+                <button onclick="hideFoundModal()" class="action-btn w-full bg-green-500 text-white rounded-xl py-3.5 text-sm font-medium">确认上报</button>
+                <button onclick="hideFoundModal()" class="w-full text-gray-500 py-3 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 未找到弹窗 -->
+    <div id="notFoundModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-4">上报未找到</h3>
+            <div class="space-y-3">
+                <input type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm" value="2号车间" readonly>
+                <textarea class="input-field w-full px-4 py-3 rounded-xl text-sm resize-none" rows="2" placeholder="描述搜寻情况..."></textarea>
+                <button onclick="hideNotFoundModal()" class="action-btn w-full bg-red-500 text-white rounded-xl py-3.5 text-sm font-medium">确认上报</button>
+                <button onclick="hideNotFoundModal()" class="w-full text-gray-500 py-3 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmFound() { document.getElementById('foundModal').classList.remove('hidden'); }
+        function hideFoundModal() { document.getElementById('foundModal').classList.add('hidden'); }
+        function confirmNotFound() { document.getElementById('notFoundModal').classList.remove('hidden'); }
+        function hideNotFoundModal() { document.getElementById('notFoundModal').classList.add('hidden'); }
+    </script>
+</body>
+</html>

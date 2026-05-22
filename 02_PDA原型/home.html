@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>首页 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-dark: #154360;
+            --accent: #3498db;
+            --surface: #fff;
+            --bg-page: #f1f5f9;
+        }
+
+        * {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-page);
+        }
+
+        /* 头部渐变 */
+        .header-bg {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 50%, #154360 100%);
+            position: relative;
+        }
+
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--surface);
+            border: 1px solid rgba(226,232,240,0.8);
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+            background: #f8fafc;
+        }
+
+        /* 功能图标背景 */
+        .icon-box {
+            background: linear-gradient(135deg, rgba(26,82,118,0.08) 0%, rgba(52,152,219,0.08) 100%);
+            position: relative;
+        }
+
+        .icon-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: 0 4px 16px -4px rgba(26,82,118,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover .icon-box::after {
+            opacity: 1;
+        }
+
+        /* 图标颜色 */
+        .icon-call { color: #1a5276; }
+        .icon-scan { color: #0891b2; }
+        .icon-flow { color: #6366f1; }
+        .icon-patrol { color: #059669; }
+        .icon-search { color: #ea580c; }
+        .icon-record { color: #8b5cf6; }
+        .icon-msg { color: #0d9488; }
+
+        /* Tab激活态 */
+        .tab-active {
+            color: var(--primary);
+            background: rgba(26,82,118,0.08);
+        }
+
+        /* 统计数字 */
+        .stat-value {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 标签 */
+        .tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .tag-active { background: rgba(26,82,118,0.1); color: #1a5276; }
+        .tag-processing { background: #fef3c7; color: #d97706; }
+        .tag-overtime { background: #fee2e2; color: #dc2626; }
+
+        /* 快捷按钮 */
+        .quick-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .quick-emergency {
+            background: linear-gradient(145deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .quick-flow {
+            background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%);
+        }
+
+        /* 待办徽章 */
+        .todo-badge {
+            min-width: 18px;
+            height: 18px;
+            font-size: 11px;
+            background: #dc2626;
+            color: #fff;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 安全区域 */
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        @media screen and (height: 812px) {
+            .safe-area-bottom { padding-bottom: 34px; }
+        }
+
+        /* 加载动画 */
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部状态栏 -->
+    <div class="header-bg text-white px-4 pt-4 pb-6 relative">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur">
+                    <i class="fas fa-user text-base"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium">张警官</p>
+                    <p class="text-xs text-blue-200">1-2监区 · 值班民警</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+                <div class="flex items-center gap-2 text-xs text-blue-200">
+                    <i class="fas fa-wifi text-xs"></i>
+                    <span>在线</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-blue-200">
+                    <i class="fas fa-battery-half text-xs"></i>
+                    <span>78%</span>
+                </div>
+                <span id="timeDisplay" class="text-sm font-medium">14:32</span>
+            </div>
+        </div>
+
+        <!-- 待办提醒 -->
+        <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 flex items-center justify-between border border-white/10">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                <span class="text-sm">您有 <b class="text-amber-300 font-semibold">3</b> 条待办事项</span>
+            </div>
+            <a href="pages/msg/list.html" class="text-sm text-blue-200 flex items-center gap-1">
+                查看 <i class="fas fa-chevron-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="px-4 -mt-3">
+        <!-- 功能入口网格 -->
+        <div class="card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-th-large text-lg icon-call"></i>
+                常用功能
+            </h3>
+            <div class="grid grid-cols-4 gap-3">
+                <a href="pages/call/list.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2 relative">
+                        <i class="fas fa-clipboard-check text-xl icon-call"></i>
+                        <span class="absolute -top-1 -right-1 todo-badge">2</span>
+                    </div>
+                    <span class="text-xs text-gray-600">人员点名</span>
+                </a>
+                <a href="pages/id-check/scan.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-qrcode text-xl icon-scan"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">扫码查人</span>
+                </a>
+                <a href="pages/flow/apply.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-person-walking-with-cane text-xl icon-flow"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">流动申请</span>
+                </a>
+                <a href="pages/patrol/route.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-map-location-dot text-xl icon-patrol"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">巡逻签到</span>
+                </a>
+                <a href="pages/find/search.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-magnifying-glass text-xl icon-search"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">人员搜寻</span>
+                </a>
+                <a href="pages/flow/list.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fas fa-list-check text-xl icon-record"></i>
+                    </div>
+                    <span class="text-xs text-gray-600">流动记录</span>
+                </a>
+                <a href="pages/msg/list.html" class="card flex flex-col items-center py-3 rounded-xl">
+                    <div class="icon-box w-12 h-12 rounded-xl flex items-center justify-center mb-2 relative">
+                        <i class="fas fa-envelope text-xl icon-msg"></i>
+                        <span class="absolute -top-1 -right-1 todo-badge">5</span>
+                    </div>
+                    <span class="text-xs text-gray-600">消息中心</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今日概览 -->
+    <div class="px-4 mt-4">
+        <div class="card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-lg icon-call"></i>
+                今日概览
+            </h3>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="text-center p-3 rounded-xl bg-gradient-to-b from-blue-50 to-blue-100/50">
+                    <p class="text-2xl font-bold stat-value">182</p>
+                    <p class="text-xs text-gray-500 mt-1">已点名</p>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-gradient-to-b from-orange-50 to-orange-100/50">
+                    <p class="text-2xl font-bold stat-value" style="--stat-value: #ea580c;color: #ea580c">4</p>
+                    <p class="text-xs text-gray-500 mt-1">未点名</p>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-gradient-to-b from-green-50 to-green-100/50">
+                    <p class="text-2xl font-bold stat-value" style="--stat-value: #059669;color: #059669">3</p>
+                    <p class="text-xs text-gray-500 mt-1">流动中</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近流动 -->
+    <div class="px-4 mt-4">
+        <div class="card rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-route text-lg icon-flow"></i>
+                    最近流动
+                </h3>
+                <a href="pages/flow/list.html" class="text-xs text-blue-600 font-medium">全部 <i class="fas fa-chevron-right text-[10px]"></i></a>
+            </div>
+            <div class="space-y-3">
+                <a href="pages/flow/list.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-50/50 hover:bg-blue-50 transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-person-walking-with-cane text-blue-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">张某某 · 监内就医</p>
+                        <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 剩余18分钟</p>
+                    </div>
+                    <span class="tag tag-active flex-shrink-0">进行中</span>
+                </a>
+                <a href="pages/flow/list.html" class="flex items-center gap-3 p-3 rounded-xl bg-orange-50/50 hover:bg-orange-50 transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-clock text-orange-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">王某某 · 送餐送货</p>
+                        <p class="text-xs text-gray-500">1-2监区 → 食堂 · 已超时23分钟</p>
+                    </div>
+                    <span class="tag tag-overtime flex-shrink-0">超时</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="px-4 mt-4 mb-4">
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="window.location.href='pages/flow/apply.html'" class="quick-btn quick-flow text-white rounded-2xl p-4 text-left shadow-lg active:scale-[0.98] transition-transform">
+                <i class="fas fa-person-walking-with-cane text-2xl mb-2"></i>
+                <p class="text-sm font-semibold">流动申请</p>
+                <p class="text-xs text-blue-100 mt-0.5">现场发起流动申请</p>
+            </button>
+            <button onclick="showEmergency()" class="quick-btn quick-emergency text-white rounded-2xl p-4 text-left shadow-lg active:scale-[0.98] transition-transform">
+                <i class="fas fa-circle-exclamation text-2xl mb-2"></i>
+                <p class="text-sm font-semibold">紧急求助</p>
+                <p class="text-xs text-red-100 mt-0.5">一键发送位置求助</p>
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="home.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-home text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="pages/call/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clipboard-check text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">点名</span>
+        </a>
+        <a href="pages/id-check/scan.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-qrcode text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">扫码</span>
+        </a>
+        <a href="pages/flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-person-walking-with-cane text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="pages/profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user text-lg"></i>
+            </div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <!-- 紧急求助确认弹窗 -->
+    <div id="emergencyModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm animate-scale-in">
+            <div class="text-center mb-5">
+                <div class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4">
+                    <i class="fas fa-triangle-exclamation text-red-500 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">确认发送紧急求助？</h3>
+                <p class="text-sm text-gray-500 mt-2">将发送您的当前位置至指挥中心，指挥中心将立即响应。</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="confirmEmergency()" class="w-full bg-red-500 text-white rounded-xl py-3.5 font-semibold text-sm active:bg-red-600 flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i>确认求助
+                </button>
+                <button onclick="hideEmergency()" class="w-full text-gray-500 py-2.5 text-sm font-medium">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        function showEmergency() { document.getElementById('emergencyModal').classList.remove('hidden'); }
+        function hideEmergency() { document.getElementById('emergencyModal').classList.add('hidden'); }
+        function confirmEmergency() {
+            const btn = event.target;
+            btn.innerHTML = '<span class="loader"></span>发送中...';
+            btn.disabled = true;
+            setTimeout(() => {
+                alert('紧急求助已发送！');
+                hideEmergency();
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i>确认求助';
+                btn.disabled = false;
+            }, 1500);
+        }
+    </script>
+
+    <style>
+        .animate-scale-in {
+            animation: scaleIn 0.2s ease-out;
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>人员查询 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2874a6; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .app-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .search-input { background: #fff; border: 1px solid rgba(226,232,240,0.8); transition: all 0.2s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(26,82,118,0.1); }
+
+        .tag-btn { transition: all 0.2s; }
+        .tag-btn.active { background: var(--primary); color: #fff; }
+        .tag-btn:not(.active) { background: #fff; color: #6b7280; }
+
+        .quick-item { transition: all 0.2s; }
+        .quick-item:active { background: #f1f5f9; }
+
+        .person-item { transition: all 0.2s; }
+        .person-item:active { background: #f1f5f9; }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">人员查询</h1>
+        <div class="text-white/80 text-xs"></div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 搜索栏 -->
+        <div class="relative">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" class="search-input w-full pl-10 pr-4 py-3 rounded-xl text-sm" placeholder="搜索姓名、编号、标签" id="searchInput">
+        </div>
+
+        <!-- 标签筛选 -->
+        <div class="flex flex-wrap gap-2">
+            <button onclick="selectTag(this)" class="tag-btn active text-xs px-3 py-1.5 rounded-full">全部</button>
+            <button onclick="selectTag(this)" class="tag-btn text-xs px-3 py-1.5 rounded-full bg-white text-gray-600 shadow-sm">高风险</button>
+            <button onclick="selectTag(this)" class="tag-btn text-xs px-3 py-1.5 rounded-full bg-white text-gray-600 shadow-sm">涉暴力</button>
+            <button onclick="selectTag(this)" class="tag-btn text-xs px-3 py-1.5 rounded-full bg-white text-gray-600 shadow-sm">涉毒</button>
+            <button onclick="selectTag(this)" class="tag-btn text-xs px-3 py-1.5 rounded-full bg-white text-gray-600 shadow-sm">短刑期</button>
+        </div>
+
+        <!-- 快捷筛选 -->
+        <div class="grid grid-cols-4 gap-2">
+            <div class="quick-item bg-white rounded-xl p-3 text-center shadow-sm">
+                <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                <p class="text-[11px] text-gray-600 mt-1">高风险</p>
+            </div>
+            <div class="quick-item bg-white rounded-xl p-3 text-center shadow-sm">
+                <i class="fas fa-map-marker-alt text-blue-500 text-xl"></i>
+                <p class="text-[11px] text-gray-600 mt-1">位置查询</p>
+            </div>
+            <div class="quick-item bg-white rounded-xl p-3 text-center shadow-sm">
+                <i class="fas fa-tags text-purple-500 text-xl"></i>
+                <p class="text-[11px] text-gray-600 mt-1">标签筛选</p>
+            </div>
+            <div class="quick-item bg-white rounded-xl p-3 text-center shadow-sm">
+                <i class="fas fa-history text-gray-500 text-xl"></i>
+                <p class="text-[11px] text-gray-600 mt-1">最近查询</p>
+            </div>
+        </div>
+
+        <!-- 搜索结果 / 人员列表 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">1-2监区人员</h3>
+            <div class="space-y-2">
+                <a href="detail.html" class="person-item flex items-center gap-3 p-3 rounded-xl">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-lg"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">张某某</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">低风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0105 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="detail.html" class="person-item flex items-center gap-3 p-3 rounded-xl">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-lg"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">李某某</span>
+                            <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">高风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0128 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="detail.html" class="person-item flex items-center gap-3 p-3 rounded-xl">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-lg"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">王某某</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">低风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0201 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="detail.html" class="person-item flex items-center gap-3 p-3 rounded-xl">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-lg"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">刘某某</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">中风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0112 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="detail.html" class="person-item flex items-center gap-3 p-3 rounded-xl">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-lg"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-800">陈某某</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">低风险</span>
+                        </div>
+                        <p class="text-xs text-gray-400">430100-0089 · 1-2监区</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="h-4"></div>
+    </div>
+
+    <script>
+        function selectTag(btn) {
+            document.querySelectorAll('.tag-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('bg-white', 'text-gray-600', 'shadow-sm');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('bg-white', 'text-gray-600', 'shadow-sm');
+        }
+    </script>
+</body>
+</html>

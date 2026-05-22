@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流动执行 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .status-tag { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+        .status-wait-out { background: #fef3c7; color: #92400e; }
+        .status-in-flow { background: #dbeafe; color: #1e40af; }
+        .status-wait-back { background: #ffedd5; color: #9a3412; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-timeout { background: #fee2e2; color: #991b1b; }
+        .timeout-yellow { background: #fef3c7; border-left: 3px solid #eab308; }
+        .timeout-orange { background: #ffedd5; border-left: 3px solid #ea580c; }
+        .timeout-red { background: #fee2e2; border-left: 3px solid #dc2626; }
+        .tab-btn { padding: 8px 16px; border-bottom: 2px solid transparent; transition: all 0.3s; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; animation: modalSlide 0.3s ease; }
+        @keyframes modalSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    
+        /* 自定义滚动条 */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fas fa-shield-alt text-xl"></i></div>
+                    <div><h1 class="font-bold text-sm">AI区域管控系统</h1><p class="text-xs text-gray-400">湖南省监狱</p></div>
+                </div>
+            </div>
+                                    <nav class="flex-1 overflow-y-auto py-4 scrollbar-thin" id="sidebarNav">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-data">数据智能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-chart-pie w-5"></i><span>数据可视化</span></a>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-personnel">人员管理</div>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-flow">流动管控</div>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../flow/execute.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-running w-5"></i><span>流动执行</span></a>
+                <a href="../flow/track.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-location-dot w-5"></i><span>实时追踪</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-call">点名管理</div>
+                <a href="../call/plan.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>点名计划</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>点名记录</span></a>
+                <a href="../call/report.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>点名报告</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-alert">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-system">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase" id="nav-business">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div>
+                    <a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>流动管控</span><span class="text-gray-400">/</span><span class="text-gray-800">流动执行</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">待出监</p><p class="text-2xl font-bold text-yellow-600 mt-1">5</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center"><i class="fas fa-door-open text-yellow-500 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-yellow-600 mt-2"><i class="fas fa-clock mr-1"></i>等待确认出监</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">流动中</p><p class="text-2xl font-bold text-blue-500 mt-1">12</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-walking text-blue-500 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-blue-600 mt-2"><i class="fas fa-map-marker-alt mr-1"></i>实时监控中</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">待归监</p><p class="text-2xl font-bold text-orange-500 mt-1">3</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center"><i class="fas fa-door-closed text-orange-500 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-orange-600 mt-2"><i class="fas fa-clock mr-1"></i>等待确认归监</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">超时预警</p><p class="text-2xl font-bold text-red-600 mt-1">2</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center"><i class="fas fa-exclamation-triangle text-red-500 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-red-600 mt-2"><i class="fas fa-exclamation mr-1"></i>需立即处理</p>
+                    </div>
+                </div>
+
+                <!-- Tab切换 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
+                    <div class="flex border-b border-gray-100">
+                        <button class="tab-btn active text-sm font-medium" onclick="switchTab(this)">待出监确认 <span class="ml-1 text-xs bg-yellow-100 text-yellow-600 px-1.5 py-0.5 rounded">5</span></button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">流动中 <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">12</span></button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">待归监确认 <span class="ml-1 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">3</span></button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">已完成</button>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700"><input type="checkbox" class="rounded"></th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">罪犯姓名</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">编号</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">监区</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">流动类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">目标区域</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">陪同民警</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">预计时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">张三</td>
+                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0012</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">一监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">监内就医</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">王警官</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">14:00 - 15:30</td>
+                                <td class="px-4 py-3"><span class="status-tag status-wait-out">待出监</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button onclick="openModal('outModal')" class="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"><i class="fas fa-sign-out-alt mr-1"></i>出监确认</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">李四</td>
+                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0035</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">二监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">会见</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">会见楼</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">赵警官</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">14:30 - 16:00</td>
+                                <td class="px-4 py-3"><span class="status-tag status-wait-out">待出监</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button onclick="openModal('outModal')" class="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"><i class="fas fa-sign-out-alt mr-1"></i>出监确认</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/30">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">王五</td>
+                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0078</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">一监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">提审</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">提审室</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">刘警官</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">13:00 - 14:30</td>
+                                <td class="px-4 py-3"><span class="status-tag status-in-flow">流动中</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"><i class="fas fa-map-marker-alt mr-1"></i>追踪</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 timeout-orange">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">赵六</td>
+                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0091</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">三监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">监内就医</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">陈警官</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">11:00 - 12:00</td>
+                                <td class="px-4 py-3"><span class="status-tag status-timeout"><i class="fas fa-exclamation-triangle mr-1"></i>超时30min</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>归监确认</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 bg-orange-50/30">
+                                <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800">孙七</td>
+                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0103</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">二监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">送餐送货</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">食堂</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">张警官</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">11:30 - 12:30</td>
+                                <td class="px-4 py-3"><span class="status-tag status-wait-back">待归监</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>归监确认</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-sm text-gray-500">共 42 条记录</span>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">上一页</button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 弹窗: 出监确认 -->
+    <div class="modal" id="outModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">出监确认</h3>
+                <button onclick="closeModal('outModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center gap-4 bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-lg">张三</h4>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <span class="text-sm text-gray-500">编号: <span class="text-gray-800">PR-0012</span></span>
+                            <span class="text-sm text-gray-500">监区: <span class="text-gray-800">一监区</span></span>
+                            <span class="text-sm text-gray-500">罪名: <span class="text-gray-800">盗窃罪</span></span>
+                            <span class="text-sm text-gray-500">刑期: <span class="text-gray-800">3年</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">流动类型</p>
+                        <p class="text-sm font-medium">监内就医</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">目标区域</p>
+                        <p class="text-sm font-medium">医疗监区</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">预计时间</p>
+                        <p class="text-sm font-medium">14:00 - 15:30 (90分钟)</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">陪同民警</p>
+                        <p class="text-sm font-medium">王警官</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">确认方式 *</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="pda" class="text-blue-500"><i class="fas fa-qrcode text-blue-500"></i><span class="text-sm">PDA扫码</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="face" class="text-blue-500" checked><i class="fas fa-face-smile text-blue-500"></i><span class="text-sm">人脸识别</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="manual" class="text-blue-500"><i class="fas fa-hand-pointer text-blue-500"></i><span class="text-sm">人工确认</span></label>
+                    </div>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p class="text-sm text-green-700"><i class="fas fa-check-circle mr-1"></i>确认后将记录实际出监时间、确认设备和确认民警</p>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('outModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('outModal')" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"><i class="fas fa-check mr-1"></i>确认出监</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗: 归监确认 -->
+    <div class="modal" id="backModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">归监确认</h3>
+                <button onclick="closeModal('backModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center gap-4 bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-lg">赵六</h4>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <span class="text-sm text-gray-500">编号: <span class="text-gray-800">PR-0091</span></span>
+                            <span class="text-sm text-gray-500">监区: <span class="text-gray-800">三监区</span></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 时长统计 -->
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center">
+                        <p class="text-xs text-blue-600 mb-1">出监时间</p>
+                        <p class="text-sm font-medium">11:05</p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-3 text-center">
+                        <p class="text-xs text-orange-600 mb-1">已用时长</p>
+                        <p class="text-sm font-bold text-orange-600">125分钟</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-3 text-center">
+                        <p class="text-xs text-red-600 mb-1">预计时长</p>
+                        <p class="text-sm font-medium">60分钟</p>
+                    </div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                    <p class="text-sm text-red-700 font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>超时警告: 实际时长超出预计时长65分钟</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">确认方式 *</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="pda" class="text-blue-500"><i class="fas fa-qrcode text-blue-500"></i><span class="text-sm">PDA扫码</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="face" class="text-blue-500" checked><i class="fas fa-face-smile text-blue-500"></i><span class="text-sm">人脸识别</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="manual" class="text-blue-500"><i class="fas fa-hand-pointer text-blue-500"></i><span class="text-sm">人工确认</span></label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">超时说明</label>
+                    <textarea rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" placeholder="请说明超时原因..."></textarea>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('backModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('backModal')" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>确认归监</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 导航栏滚动位置记忆
+        const SCROLL_KEY = 'sidebarNavScrollPos';
+        function saveScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem(SCROLL_KEY, sidebarNav.scrollTop);
+        }
+        function restoreScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (!sidebarNav) return;
+            const savedPos = localStorage.getItem(SCROLL_KEY);
+            if (savedPos !== null) {
+                requestAnimationFrame(() => {
+                    sidebarNav.scrollTop = parseInt(savedPos, 10);
+                });
+            }
+        }
+
+        // 页面即将离开时保存滚动位置
+        window.addEventListener('beforeunload', function() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem('sidebarNavScrollPos', sidebarNav.scrollTop);
+        });
+                                document.addEventListener('DOMContentLoaded', function() {
+            restoreScrollPosition();
+            // 高亮当前页面导航链接
+            // 获取当前页面路径键（用于导航高亮）
+            function getPathKey(url, href) {
+                const urlParts = url.split('/');
+                let currentDir = urlParts.slice(3, -1);
+                if (href === null || href === undefined || href === '') {
+                    return currentDir.concat([urlParts[urlParts.length - 1]]).join('/');
+                }
+                const linkParts = href.split('/');
+                for (let i = 0; i < linkParts.length - 1; i++) {
+                    const part = linkParts[i];
+                    if (part === '..') currentDir.pop();
+                    else if (part && part !== '.') currentDir.push(part);
+                }
+                const filename = linkParts[linkParts.length - 1];
+                currentDir.push(filename);
+                return currentDir.join('/');
+            }
+            const currentPath = window.location.href;
+            const currentKey = getPathKey(currentPath, currentPath.split("/").pop());
+            document.querySelectorAll('#sidebarNav a').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                const linkKey = getPathKey(currentPath, linkHref);
+                if (linkKey === currentKey) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+                // Using beforeunload for scroll position
+            });
+        });
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
+        });
+        function switchTab(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-gray-600'); });
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-600');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>消息中心 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .filter-tag { border: 1.5px solid #e2e8f0; transition: all 0.2s; }
+        .filter-tag.active { border-color: var(--primary); background: rgba(26,82,118,0.08); color: var(--primary); }
+
+        .msg-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+        .msg-item { transition: all 0.2s; }
+        .msg-item:active { background: #f8fafc; }
+
+        .msg-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .icon-urgent { background: #fee2e2; color: #dc2626; }
+        .icon-approve { background: #fef3c7; color: #d97706; }
+        .icon-notice { background: #dbeafe; color: #1d4ed8; }
+        .icon-psy { background: #ede9fe; color: #7c3aed; }
+        .icon-success { background: #dcfce7; color: #16a34a; }
+        .icon-info { background: #f1f5f9; color: #64748b; }
+
+        .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">消息中心</h1>
+        <button class="text-xs text-white/80">全部已读</button>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 待办事项 -->
+        <div class="msg-card rounded-xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-clock text-orange-500"></i>待办事项
+            </h3>
+            <div class="space-y-2">
+                <a href="../flow/approve.html" class="flex items-center gap-3 p-3 rounded-xl bg-orange-50">
+                    <div class="msg-icon icon-approve">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">3条流动申请待审批</p>
+                        <p class="text-xs text-gray-400">最新: 李警官 · 监内就医 · 10分钟前</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+                <a href="../alert/detail.html" class="flex items-center gap-3 p-3 rounded-xl bg-red-50">
+                    <div class="msg-icon icon-urgent">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">2条预警待处理</p>
+                        <p class="text-xs text-gray-400">最新: 异常聚集预警 · 2分钟前</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 筛选 -->
+        <div class="flex gap-2 overflow-x-auto">
+            <button onclick="filterList(this)" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">通知</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">预警</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">审批</button>
+        </div>
+
+        <!-- 消息列表 -->
+        <div class="msg-card rounded-xl overflow-hidden">
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+                <div class="msg-icon icon-urgent">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-800">紧急预警通知</span>
+                        <span class="unread-dot"></span>
+                    </div>
+                    <p class="text-xs text-gray-500 truncate">1-2监区2号车间异常聚集，请立即处理</p>
+                    <p class="text-xs text-gray-400 mt-1">2分钟前</p>
+                </div>
+            </a>
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+                <div class="msg-icon icon-approve">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-800">流动审批提醒</span>
+                        <span class="unread-dot"></span>
+                    </div>
+                    <p class="text-xs text-gray-500 truncate">李警官提交了监内就医流动申请，请审批</p>
+                    <p class="text-xs text-gray-400 mt-1">10分钟前</p>
+                </div>
+            </a>
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+                <div class="msg-icon icon-notice">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-800">系统公告</span>
+                    <p class="text-xs text-gray-500 truncate">今日15:00将进行全监区联合点名演练</p>
+                    <p class="text-xs text-gray-400 mt-1">1小时前</p>
+                </div>
+            </a>
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+                <div class="msg-icon icon-psy">
+                    <i class="fas fa-heart-pulse"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-800">心理感知通知</span>
+                    <p class="text-xs text-gray-500 truncate">李某某风险等级调整为高风险，请关注</p>
+                    <p class="text-xs text-gray-400 mt-1">2小时前</p>
+                </div>
+            </a>
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 border-b border-gray-50 opacity-60">
+                <div class="msg-icon icon-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-800">流动审批通过</span>
+                    <p class="text-xs text-gray-500 truncate">您申请的张某某监内就医已通过审批</p>
+                    <p class="text-xs text-gray-400 mt-1">3小时前</p>
+                </div>
+            </a>
+            <a href="#" class="msg-item flex items-center gap-3 px-4 py-4 opacity-60">
+                <div class="msg-icon icon-info">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-800">点名任务完成</span>
+                    <p class="text-xs text-gray-500 truncate">1-2监区晚间点名已完成，完成率96.3%</p>
+                    <p class="text-xs text-gray-400 mt-1">5小时前</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="../flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="../alert/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400 relative">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-bell text-lg"></i></div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">3</span>
+            <span class="text-[11px] mt-1">预警</span>
+        </a>
+        <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl relative">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-envelope text-lg"></i></div>
+            <span class="absolute -top-0.5 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center">8</span>
+            <span class="text-[11px] mt-1">消息</span>
+        </a>
+        <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-user text-lg"></i></div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        function filterList(btn) {
+            document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

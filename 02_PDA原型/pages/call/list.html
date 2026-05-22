@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>点名任务 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .filter-tag {
+            border: 1.5px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .filter-tag.active {
+            border-color: var(--primary);
+            background: rgba(26,82,118,0.08);
+            color: var(--primary);
+        }
+
+        .task-card { background: #fff; transition: all 0.2s; }
+        .task-card:active { background: #f1f5f9; }
+
+        .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+        .tag-running { background: #dbeafe; color: #1d4ed8; }
+        .tag-done { background: #dcfce7; color: #16a34a; }
+
+        .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">点名任务</h1>
+        <button class="text-white/80"><i class="fas fa-history text-lg"></i></button>
+    </div>
+
+    <div class="p-3 space-y-3">
+        <!-- 筛选标签 -->
+        <div class="flex gap-2 overflow-x-auto pb-1">
+            <button onclick="switchTab(this, 'all')" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
+            <button onclick="switchTab(this, 'running')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">进行中</button>
+            <button onclick="switchTab(this, 'done')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">已完成</button>
+        </div>
+
+        <!-- 进行中任务1 -->
+        <a href="task.html?id=1" class="task-card block rounded-xl p-3 border-l-4 border-blue-600 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-clock text-blue-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-gray-800 truncate">1-2监区 · 晚间点名</h2>
+                        <span class="text-xs tag tag-running flex-shrink-0 ml-2">进行中</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-gray-400">21:00 · 应点186</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-green-600">已点182</span>
+                            <span class="text-orange-500">未点4</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+        </a>
+
+        <!-- 进行中任务2 -->
+        <a href="task.html?id=2" class="task-card block rounded-xl p-3 border-l-4 border-blue-600 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-clock text-blue-600 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-gray-800 truncate">1-1监区 · 早起点名</h2>
+                        <span class="text-xs tag tag-running flex-shrink-0 ml-2">进行中</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-gray-400">08:00 · 应点179</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-green-600">已点175</span>
+                            <span class="text-orange-500">未点4</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+        </a>
+
+        <!-- 已完成任务1 -->
+        <a href="task.html?id=3" class="task-card block rounded-xl p-3 border-l-4 border-green-500 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-check text-green-500 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-gray-800 truncate">严管区 · 晚间点名</h2>
+                        <span class="text-xs tag tag-done flex-shrink-0 ml-2">已完成</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-gray-400">05-20 21:00</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-green-600">已点86</span>
+                            <span class="text-gray-400">未点0</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+        </a>
+
+        <!-- 已完成任务2 -->
+        <a href="task.html?id=4" class="task-card block rounded-xl p-3 border-l-4 border-green-500 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-check text-green-500 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-gray-800 truncate">2-1监区 · 午休点名</h2>
+                        <span class="text-xs tag tag-done flex-shrink-0 ml-2">已完成</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-gray-400">05-20 12:00</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-green-600">已点188</span>
+                            <span class="text-gray-400">未点2</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+        </a>
+
+        <!-- 已完成任务3 -->
+        <a href="task.html?id=5" class="task-card block rounded-xl p-3 border-l-4 border-green-500 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-check text-green-500 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-gray-800 truncate">1-1监区 · 午休点名</h2>
+                        <span class="text-xs tag tag-done flex-shrink-0 ml-2">已完成</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-gray-400">05-20 12:00</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="text-green-600">已点179</span>
+                            <span class="text-gray-400">未点0</span>
+                        </div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- 底部Tab栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 safe-area-bottom">
+        <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
+            <span class="text-[11px] mt-1">首页</span>
+        </a>
+        <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-clipboard-check text-lg"></i></div>
+            <span class="text-[11px] mt-1">点名</span>
+        </a>
+        <a href="../id-check/scan.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-qrcode text-lg"></i></div>
+            <span class="text-[11px] mt-1">扫码</span>
+        </a>
+        <a href="../flow/list.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
+            <span class="text-[11px] mt-1">流动</span>
+        </a>
+        <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-user text-lg"></i></div>
+            <span class="text-[11px] mt-1">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        function switchTab(btn, type) {
+            document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

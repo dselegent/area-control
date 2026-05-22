@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>巡逻签到 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .task-card { background: #fff; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06); }
+
+        .progress-bar { background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, var(--primary), #3498db); border-radius: 999px; transition: width 0.5s ease; }
+
+        .current-point { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .checkin-btn { background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%); transition: all 0.2s; }
+        .checkin-btn:active { transform: scale(0.97); }
+
+        .point-done { border-color: #22c55e; background: #dcfce7; }
+        .point-current { border-color: var(--primary); background: #dbeafe; animation: pulse 2s infinite; }
+        .point-pending { border-color: #e2e8f0; background: #f8fafc; }
+
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(26,82,118,0.3); } 50% { box-shadow: 0 0 0 8px rgba(26,82,118,0); } }
+
+        .connector-done { background: #22c55e; }
+        .connector-pending { background: #e2e8f0; }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">巡逻签到</h1>
+        <div class="flex items-center gap-1 text-xs text-green-400">
+            <i class="fas fa-circle text-[8px]"></i>
+            <span>记录中</span>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 巡逻信息 -->
+        <div class="task-card rounded-xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-800">1-2监区 · 夜间巡逻</h2>
+                    <p class="text-xs text-gray-400 mt-1">路线: A线 · 8个签到点</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">已用时</p>
+                    <div id="elapsedTime" class="text-xl font-bold" style="color:var(--primary)">00:23:45</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="progress-bar flex-1 h-2">
+                    <div id="progressBar" class="progress-fill h-full" style="width: 37.5%"></div>
+                </div>
+                <span class="text-xs font-medium text-gray-600" id="progressText">3/8</span>
+            </div>
+        </div>
+
+        <!-- 当前签到点 -->
+        <div class="current-point rounded-xl p-4 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-xs text-blue-200">当前签到点</p>
+                    <h3 class="text-base font-bold">4号签到点 · 走廊东侧</h3>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-2xl"></i>
+                </div>
+            </div>
+            <button onclick="doCheckin()" class="checkin-btn w-full text-white rounded-xl py-3.5 font-semibold text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-qrcode text-lg"></i>
+                <span>扫码签到</span>
+            </button>
+        </div>
+
+        <!-- 签到结果 -->
+        <div id="checkinResult" class="hidden bg-green-50 border border-green-200 rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check text-green-500 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-green-800">签到成功</p>
+                    <p class="text-xs text-green-600">4号签到点 · 21:23:45</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 签到点列表 -->
+        <div class="task-card rounded-xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">签到点列表</h3>
+            <div class="space-y-3">
+                <!-- 已完成 -->
+                <div class="point-done flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"><i class="fas fa-check text-white text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">1号签到点 · 监区入口</p><p class="text-xs text-green-600">21:00:12 签到</p></div>
+                </div>
+                <div class="h-4 w-0.5 bg-green-300 mx-auto"></div>
+                <div class="point-done flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"><i class="fas fa-check text-white text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">2号签到点 · 走廊西侧</p><p class="text-xs text-green-600">21:05:38 签到</p></div>
+                </div>
+                <div class="h-4 w-0.5 bg-green-300 mx-auto"></div>
+                <div class="point-done flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"><i class="fas fa-check text-white text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">3号签到点 · 活动场</p><p class="text-xs text-green-600">21:12:05 签到</p></div>
+                </div>
+                <div class="h-4 w-0.5 bg-blue-400 mx-auto"></div>
+                <!-- 当前 -->
+                <div class="point-current flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center"><i class="fas fa-location-dot text-white text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">4号签到点 · 走廊东侧</p><p class="text-xs text-blue-600">当前位置</p></div>
+                    <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">待签到</span>
+                </div>
+                <div class="h-4 w-0.5 bg-gray-200 mx-auto"></div>
+                <!-- 未完成 -->
+                <div class="point-pending flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"><span class="text-white text-xs font-medium">5</span></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-500">5号签到点 · 洗手间</p><p class="text-xs text-gray-400">未到达</p></div>
+                </div>
+                <div class="h-4 w-0.5 bg-gray-200 mx-auto"></div>
+                <div class="point-pending flex items-center gap-3 p-3 rounded-xl border">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"><span class="text-white text-xs font-medium">6</span></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-500">6号签到点 · 楼梯间</p><p class="text-xs text-gray-400">未到达</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 异常上报 -->
+        <button onclick="reportIssue()" class="w-full bg-white border border-orange-200 text-orange-600 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>异常事件上报</span>
+        </button>
+
+        <!-- 结束巡逻 -->
+        <button onclick="endPatrol()" class="w-full bg-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">
+            <i class="fas fa-stop-circle mr-2"></i>结束巡逻
+        </button>
+    </div>
+
+    <!-- 异常上报弹窗 -->
+    <div id="issueModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-4">异常事件上报</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">异常类型</label>
+                    <select class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none">
+                        <option>设施损坏</option>
+                        <option>安全隐患</option>
+                        <option>人员异常</option>
+                        <option>其他</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600 mb-2 block">情况说明</label>
+                    <textarea class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none resize-none" rows="3" placeholder="请描述异常情况..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button class="flex-1 bg-gray-100 text-gray-600 rounded-xl py-3 text-xs flex items-center justify-center gap-2"><i class="fas fa-camera"></i> 拍照</button>
+                    <button class="flex-1 bg-gray-100 text-gray-600 rounded-xl py-3 text-xs flex items-center justify-center gap-2"><i class="fas fa-microphone"></i> 录音</button>
+                </div>
+                <button onclick="hideIssueModal()" class="action-btn w-full bg-orange-500 text-white rounded-xl py-3.5 text-sm font-medium">提交上报</button>
+                <button onclick="hideIssueModal()" class="w-full text-gray-500 py-3 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let elapsed = 23 * 60 + 45;
+        function updateElapsed() {
+            elapsed++;
+            const h = Math.floor(elapsed / 3600);
+            const m = Math.floor((elapsed % 3600) / 60);
+            const s = elapsed % 60;
+            document.getElementById('elapsedTime').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+        setInterval(updateElapsed, 1000);
+
+        function doCheckin() {
+            document.getElementById('checkinResult').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('checkinResult').classList.add('hidden'); }, 3000);
+        }
+
+        function reportIssue() { document.getElementById('issueModal').classList.remove('hidden'); }
+        function hideIssueModal() { document.getElementById('issueModal').classList.add('hidden'); }
+
+        function endPatrol() {
+            if (confirm('确认结束巡逻?')) alert('巡逻已结束,数据已同步');
+        }
+    </script>
+</body>
+</html>

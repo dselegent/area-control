@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点名计划 - 湖南省监狱AI区域管控系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sidebar { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); border-right: 3px solid #3b82f6; }
+        .nav-item.active { color: #3b82f6; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; animation: modalSlide 0.3s ease; }
+        @keyframes modalSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        .tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .tag-primary { background: #dbeafe; color: #1e40af; }
+        .tag-success { background: #d1fae5; color: #065f46; }
+        .tag-warning { background: #fef3c7; color: #92400e; }
+        .tag-danger { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm">AI区域管控系统</h1>
+                        <p class="text-xs text-gray-400">湖南省监狱</p>
+                    </div>
+                </div>
+            </div>
+            <nav id="sidebarNav" class="flex-1 overflow-y-auto py-4 scrollbar-thin">
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">数据智能</div>
+                <a href="../../index.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-chart-pie w-5"></i><span>数据可视化</span></a>
+                <a href="../prisoner-info/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>罪犯信息一体化</span></a>
+                <a href="../psyche/dashboard.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-brain w-5"></i><span>心理感知预警</span></a>
+                <a href="../psyche/micro-expression.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-microscope w-5"></i><span>微表情采集分析</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">人员管理</div>
+                <a href="../personnel/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-users w-5"></i><span>人员库管理</span></a>
+                <a href="../personnel/tag-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-tags w-5"></i><span>标签管理</span></a>
+                <a href="../personnel/attr-management.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-exclamation-circle w-5"></i><span>特殊属性管理</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">流动管控</div>
+                <a href="../flow/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-walking w-5"></i><span>零星流动管控</span></a>
+                <a href="../flow/execute.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-running w-5"></i><span>流动执行</span></a>
+                <a href="../flow/track.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-location-dot w-5"></i><span>实时追踪</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">点名管理</div>
+                <a href="../call/plan.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>点名计划</span></a>
+                <a href="../call/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-clipboard-check w-5"></i><span>点名记录</span></a>
+                <a href="../call/report.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>点名报告</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">预警管理</div>
+                <a href="../alert/list.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-bell w-5"></i><span>预警信息管理</span></a>
+                <a href="../ai-vision/monitor.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-video w-5"></i><span>智能行为预警</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">系统管理</div>
+                <a href="../system/organization.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-sitemap w-5"></i><span>组织架构管理</span></a>
+                <a href="../system/user.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user w-5"></i><span>用户管理</span></a>
+                <a href="../system/role.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-user-tag w-5"></i><span>角色管理</span></a>
+                <a href="../system/permission.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-key w-5"></i><span>菜单权限管理</span></a>
+                <a href="../system/config.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-calendar-day w-5"></i><span>工作流配置</span></a>
+                <a href="../system/workflow.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-check-double w-5"></i><span>审批流程配置</span></a>
+                <a href="../system/params.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cogs w-5"></i><span>系统参数</span></a>
+                <a href="../system/backup.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-database w-5"></i><span>数据备份</span></a>
+
+                <div class="px-4 mt-6 mb-2 text-xs text-gray-400 uppercase">业务管理</div>
+                <a href="../business/device.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-server w-5"></i><span>设备管理</span></a>
+                <a href="../business/area.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-map-marked-alt w-5"></i><span>区域管理</span></a>
+                <a href="../business/model3d.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-cube w-5"></i><span>3D模型管理</span></a>
+                <a href="../business/log.html" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-300"><i class="fas fa-file-alt w-5"></i><span>日志审计</span></a>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" class="w-10 h-10 rounded-full bg-gray-600">
+                    <div class="flex-1"><p class="text-sm font-medium">系统管理员</p><p class="text-xs text-gray-400">admin</p></div>
+                    <a href="../../login.html" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-home text-gray-400"></i><span class="text-gray-400">/</span><span>点名管理</span><span class="text-gray-400">/</span><span class="text-gray-800">点名计划</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-500" id="currentTime"></span>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 relative"><i class="fas fa-bell"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 操作栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <button onclick="openModal('createPlanModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1"><i class="fas fa-plus"></i>创建计划</button>
+                            <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-download"></i>导出</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="搜索计划名称" class="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <option>全部类型</option>
+                                <option>日常点名</option>
+                                <option>定时点名</option>
+                                <option>应急点名</option>
+                            </select>
+                            <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                                <option>全部状态</option>
+                                <option>待执行</option>
+                                <option>执行中</option>
+                                <option>已完成</option>
+                                <option>已取消</option>
+                            </select>
+                            <button class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">计划总数</p><p class="text-2xl font-bold text-gray-800 mt-1">12</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-calendar-alt text-blue-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">待执行</p><p class="text-2xl font-bold text-amber-500 mt-1">5</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fas fa-clock text-amber-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">执行中</p><p class="text-2xl font-bold text-blue-500 mt-1">2</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-spinner text-blue-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-gray-500">本月完成</p><p class="text-2xl font-bold text-green-500 mt-1">45</p></div>
+                            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center"><i class="fas fa-check-circle text-green-500 text-xl"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 计划列表 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">计划名称</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">计划类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">执行方式</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">执行时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">点名范围</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">执行警察</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">创建时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">日常巡查点名</td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">日常点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-success">每日循环</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">每天 08:00, 15:00<br><span class="text-xs text-gray-400">(节假日顺延)</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">一监区、二监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">王建国、李明</td>
+                                <td class="px-4 py-3"><span class="tag tag-warning">待执行</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-18 16:30</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="editPlan(1)"><i class="fas fa-edit"></i></button>
+                                    <button class="text-green-500 hover:text-green-700 mr-2" onclick="executePlan(1)"><i class="fas fa-play"></i></button>
+                                    <button class="text-gray-400 hover:text-gray-600" onclick="cancelPlan(1)"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">周检点名</td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">定时点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-success">每周循环</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">每周二、四 09:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">全部监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">赵伟、张强、陈磊</td>
+                                <td class="px-4 py-3"><span class="tag tag-warning">待执行</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-18 17:00</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="editPlan(2)"><i class="fas fa-edit"></i></button>
+                                    <button class="text-green-500 hover:text-green-700 mr-2" onclick="executePlan(2)"><i class="fas fa-play"></i></button>
+                                    <button class="text-gray-400 hover:text-gray-600" onclick="cancelPlan(2)"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">月度点名</td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">定时点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-success">每月循环</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">每月 1,15日 10:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">全部监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">王建国、李明、赵伟</td>
+                                <td class="px-4 py-3"><span class="tag tag-warning">待执行</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-17 10:00</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="editPlan(3)"><i class="fas fa-edit"></i></button>
+                                    <button class="text-green-500 hover:text-green-700 mr-2" onclick="executePlan(3)"><i class="fas fa-play"></i></button>
+                                    <button class="text-gray-400 hover:text-gray-600" onclick="cancelPlan(3)"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">紧急集合点名</td>
+                                <td class="px-4 py-3"><span class="tag tag-danger">应急点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">一次性</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2025-05-19 14:30</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">三监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">刘洋</td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">执行中</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-19 14:25</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="viewPlan(4)"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">日常巡查点名-2025-05-18</td>
+                                <td class="px-4 py-3"><span class="tag tag-success">日常点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">一次性</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2025-05-18 08:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">一监区、二监区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">王建国、李明</td>
+                                <td class="px-4 py-3"><span class="tag tag-success">已完成</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-17 16:30</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="viewPlan(5)"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800 font-medium">临时抽点名-2025-05-17</td>
+                                <td class="px-4 py-3"><span class="tag tag-danger">应急点名</span></td>
+                                <td class="px-4 py-3"><span class="tag tag-primary">一次性</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2025-05-17 15:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">严管区</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">陈磊</td>
+                                <td class="px-4 py-3"><span class="tag tag-success">已完成</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2025-05-17 14:55</td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="viewPlan(6)"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="flex items-center justify-between mt-4">
+                    <p class="text-sm text-gray-500">共 12 条记录，第 1/1 页</p>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" disabled>上一页</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 创建计划弹窗 -->
+    <div class="modal" id="createPlanModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg"><i class="fas fa-calendar-plus text-blue-500 mr-2"></i>创建点名计划</h3>
+                <button onclick="closeModal('createPlanModal')" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">计划名称</label>
+                        <input type="text" id="planName" placeholder="请输入计划名称" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">计划类型</label>
+                        <select id="planType" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <option value="daily">日常点名</option>
+                            <option value="temp">临时点名</option>
+                            <option value="timed">定时点名</option>
+                            <option value="emergency">应急点名</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">是否循环执行</label>
+                        <select id="planLoop" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500" onchange="toggleLoopOptions()">
+                            <option value="once">一次性执行</option>
+                            <option value="daily">每日循环</option>
+                            <option value="weekly">每周循环</option>
+                            <option value="monthly">每月循环</option>
+                        </select>
+                    </div>
+
+                    <!-- 循环执行选项 -->
+                    <div class="col-span-2" id="loopOptions" style="display: none;">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">执行时间（可多选）</label>
+                            <div id="timeSlots" class="flex flex-wrap gap-2 mb-3">
+                                <div class="flex items-center gap-1 px-2 py-1 border border-gray-200 rounded-lg bg-white">
+                                    <input type="time" id="timeSlot1" value="08:00" class="w-20 text-sm border-none outline-none bg-transparent">
+                                    <button onclick="removeTimeSlot(this)" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times text-xs"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addTimeSlot()" class="text-sm text-blue-500 hover:text-blue-600 mb-3"><i class="fas fa-plus mr-1"></i>添加时间段</button>
+
+                            <div id="dailyOptions" style="display: none;">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">每日执行次数</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="dailyCount" value="1" min="1" max="10" class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm" onchange="generateDailyTimes()">
+                                    <span class="text-sm text-gray-500 self-center">次</span>
+                                </div>
+                            </div>
+
+                            <div id="weeklyOptions" style="display: none;">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">选择星期</label>
+                                <div class="flex gap-2 flex-wrap">
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="1">
+                                        <span class="text-sm">周一</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="2" checked>
+                                        <span class="text-sm">周二</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="3" checked>
+                                        <span class="text-sm">周三</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="4" checked>
+                                        <span class="text-sm">周四</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="5" checked>
+                                        <span class="text-sm">周五</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="6">
+                                        <span class="text-sm">周六</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="0">
+                                        <span class="text-sm">周日</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="monthlyOptions" style="display: none;">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">选择日期</label>
+                                <div class="flex gap-2 flex-wrap">
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="1">
+                                        <span class="text-sm">1日</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="5">
+                                        <span class="text-sm">5日</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="10">
+                                        <span class="text-sm">10日</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="15">
+                                        <span class="text-sm">15日</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="20">
+                                        <span class="text-sm">20日</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" class="rounded text-blue-500" value="25">
+                                        <span class="text-sm">25日</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="holidayDelay" class="rounded text-blue-500">
+                                    <span class="text-sm text-gray-600">节假日顺延</span>
+                                </label>
+                                <span class="text-xs text-gray-400">（如遇法定节假日，自动延迟到下一工作日执行）</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 一次性执行时显示单个时间 -->
+                    <div id="singleTimeOption">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">执行时间</label>
+                        <input type="datetime-local" id="planTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div></div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名范围</label>
+                        <select id="planScope" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <option value="all">全部监区</option>
+                            <option value="zone1">一监区</option>
+                            <option value="zone2">二监区</option>
+                            <option value="zone3">三监区</option>
+                            <option value="strict">严管区</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">执行警察（可多选）</label>
+                        <div id="planPoliceContainer" class="border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="wjg"><span class="text-sm">王建国</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="lm"><span class="text-sm">李明</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="zw"><span class="text-sm">赵伟</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="zq"><span class="text-sm">张强</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="cl"><span class="text-sm">陈磊</span></label>
+                            <label class="flex items-center gap-2 py-1"><input type="checkbox" class="rounded text-blue-500" value="all"><span class="text-sm">全部警察</span></label>
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名方式</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" id="methodPda" checked class="w-4 h-4 text-blue-500 rounded">
+                                <span class="text-sm text-gray-600">PDA扫码点名</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" id="methodFace" class="w-4 h-4 text-blue-500 rounded">
+                                <span class="text-sm text-gray-600">人脸识别点名</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" id="methodManual" class="w-4 h-4 text-blue-500 rounded">
+                                <span class="text-sm text-gray-600">手动点名</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                        <textarea id="planRemark" rows="3" placeholder="请输入备注信息" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('createPlanModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button>
+                <button onclick="savePlan()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存计划</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑计划弹窗 -->
+    <div class="modal" id="editPlanModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg"><i class="fas fa-edit text-blue-500 mr-2"></i>编辑点名计划</h3>
+                <button onclick="closeModal('editPlanModal')" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">计划名称</label>
+                        <input type="text" id="editPlanName" placeholder="请输入计划名称" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">计划类型</label>
+                        <select id="editPlanType" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <option value="daily">日常点名</option>
+                            <option value="temp">临时点名</option>
+                            <option value="timed">定时点名</option>
+                            <option value="emergency">应急点名</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">执行时间</label>
+                        <input type="datetime-local" id="editPlanTime" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">点名范围</label>
+                        <select id="editPlanScope" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <option value="all">全部监区</option>
+                            <option value="zone1">一监区</option>
+                            <option value="zone2">二监区</option>
+                            <option value="zone3">三监区</option>
+                            <option value="strict">严管区</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">执行警察</label>
+                        <select id="editPlanPolice" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500">
+                            <option value="all">全部警察</option>
+                            <option value="wjg">王建国</option>
+                            <option value="lm">李明</option>
+                            <option value="zw">赵伟</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                        <textarea id="editPlanRemark" rows="3" placeholder="请输入备注信息" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('editPlanModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">取消</button>
+                <button onclick="updatePlan()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function toggleLoopOptions() {
+            const loopType = document.getElementById('planLoop').value;
+            const loopOptions = document.getElementById('loopOptions');
+            const singleTimeOption = document.getElementById('singleTimeOption');
+
+            if (loopType === 'once') {
+                loopOptions.style.display = 'none';
+                singleTimeOption.style.display = 'block';
+            } else {
+                loopOptions.style.display = 'block';
+                singleTimeOption.style.display = 'none';
+
+                // 显示对应的循环选项
+                document.getElementById('dailyOptions').style.display = loopType === 'daily' ? 'block' : 'none';
+                document.getElementById('weeklyOptions').style.display = loopType === 'weekly' ? 'block' : 'none';
+                document.getElementById('monthlyOptions').style.display = loopType === 'monthly' ? 'block' : 'none';
+            }
+        }
+
+        function addTimeSlot() {
+            const container = document.getElementById('timeSlots');
+            const slots = container.querySelectorAll('[id^="timeSlot"]');
+            const newId = slots.length + 1;
+
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-1 px-2 py-1 border border-gray-200 rounded-lg bg-white';
+            div.innerHTML = `
+                <input type="time" id="timeSlot${newId}" value="${newId === 2 ? '15:00' : '10:00'}" class="w-20 text-sm border-none outline-none bg-transparent">
+                <button type="button" onclick="removeTimeSlot(this)" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times text-xs"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeTimeSlot(btn) {
+            const container = document.getElementById('timeSlots');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+
+        function savePlan() {
+            const planName = document.getElementById('planName').value;
+            const planType = document.getElementById('planType').value;
+            const planLoop = document.getElementById('planLoop').value;
+            const planScope = document.getElementById('planScope').value;
+            const methodPda = document.getElementById('methodPda').checked;
+            const methodFace = document.getElementById('methodFace').checked;
+            const methodManual = document.getElementById('methodManual').checked;
+            const planRemark = document.getElementById('planRemark').value;
+
+            // 获取选中的警察
+            const policeCheckboxes = document.querySelectorAll('#planPoliceContainer input[type="checkbox"]:checked');
+            const selectedPolice = Array.from(policeCheckboxes).map(cb => cb.nextElementSibling.textContent).join(', ') || '-';
+
+            if (!planName) {
+                alert('请输入计划名称');
+                return;
+            }
+
+            if (planLoop === 'once') {
+                const planTime = document.getElementById('planTime').value;
+                if (!planTime) {
+                    alert('请选择执行时间');
+                    return;
+                }
+            }
+
+            // 构建循环计划信息
+            let scheduleInfo = '';
+            if (planLoop !== 'once') {
+                const timeInputs = document.querySelectorAll('#timeSlots input[type="time"]');
+                const times = Array.from(timeInputs).map(t => t.value).join(', ');
+                const holidayDelay = document.getElementById('holidayDelay').checked ? ' (节假日顺延)' : '';
+
+                switch (planLoop) {
+                    case 'daily':
+                        scheduleInfo = `每日 ${times}${holidayDelay}`;
+                        break;
+                    case 'weekly':
+                        const weekDays = [];
+                        document.querySelectorAll('#weeklyOptions input[type="checkbox"]:checked').forEach(cb => {
+                            const dayMap = {'0': '周日', '1': '周一', '2': '周二', '3': '周三', '4': '周四', '5': '周五', '6': '周六'};
+                            weekDays.push(dayMap[cb.value]);
+                        });
+                        scheduleInfo = `每周 ${weekDays.join(', ')} ${times}${holidayDelay}`;
+                        break;
+                    case 'monthly':
+                        const monthDays = [];
+                        document.querySelectorAll('#monthlyOptions input[type="checkbox"]:checked').forEach(cb => {
+                            monthDays.push(cb.value + '日');
+                        });
+                        scheduleInfo = `每月 ${monthDays.join(', ')} ${times}${holidayDelay}`;
+                        break;
+                }
+            }
+
+            alert('计划创建成功！');
+            closeModal('createPlanModal');
+            // 重置表单
+            document.getElementById('planName').value = '';
+            document.getElementById('planTime').value = '';
+            document.getElementById('planRemark').value = '';
+            document.getElementById('planLoop').value = 'once';
+            toggleLoopOptions();
+        }
+
+        function editPlan(id) {
+            // 模拟加载计划数据
+            document.getElementById('editPlanName').value = '日常巡查点名-2025-05-19';
+            document.getElementById('editPlanType').value = 'daily';
+            document.getElementById('editPlanTime').value = '2025-05-19T08:00';
+            document.getElementById('editPlanScope').value = 'all';
+            document.getElementById('editPlanPolice').value = 'all';
+            document.getElementById('editPlanRemark').value = '';
+            openModal('editPlanModal');
+        }
+
+        function updatePlan() {
+            alert('计划更新成功！');
+            closeModal('editPlanModal');
+        }
+
+        function executePlan(id) {
+            if (confirm('确定要立即执行该点名计划吗？')) {
+                alert('点名任务已启动，请前往点名记录查看进度！');
+            }
+        }
+
+        function cancelPlan(id) {
+            if (confirm('确定要取消该点名计划吗？')) {
+                alert('计划已取消！');
+            }
+        }
+
+        function viewPlan(id) {
+            // 查看该计划下的所有点名记录，跳转到点名记录页面并带上计划ID参数
+            window.location.href = 'list.html?planId=' + id;
+        }
+
+        // 导航栏滚动位置记忆
+        const SCROLL_KEY = 'sidebarNavScrollPos';
+        function saveScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem(SCROLL_KEY, sidebarNav.scrollTop);
+        }
+        function restoreScrollPosition() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (!sidebarNav) return;
+            const savedPos = localStorage.getItem(SCROLL_KEY);
+            if (savedPos !== null) {
+                requestAnimationFrame(() => {
+                    sidebarNav.scrollTop = parseInt(savedPos, 10);
+                });
+            }
+        }
+        window.addEventListener('beforeunload', function() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            if (sidebarNav) localStorage.setItem('sidebarNavScrollPos', sidebarNav.scrollTop);
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            restoreScrollPosition();
+            const currentPath = window.location.href;
+            const currentFullPath = currentPath.split('/').slice(-2).join('/');
+            document.querySelectorAll('#sidebarNav a').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                const linkFullPath = linkHref.split('/').slice(-2).join('/');
+                if (linkFullPath === currentFullPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
