@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>审批详情 - 执勤干警APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2874a6; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .app-card {
+            background: #fff;
+            border: 1px solid rgba(226,232,240,0.8);
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
+        }
+
+        .person-card { background: #f8fafc; }
+
+        .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+        .tag-progress { background: #dbeafe; color: #1d4ed8; }
+        .tag-pending { background: #fef3c7; color: #d97706; }
+
+        .action-btn { transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.98); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
+</head>
+<body class="pb-6">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="approve.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">审批详情</h1>
+        <div class="w-8"></div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 基本信息 -->
+        <div class="app-card rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="tag tag-pending">待审批</span>
+                    <span class="text-xs text-gray-400">监内就医</span>
+                </div>
+                <span class="text-xs text-orange-500 font-medium">剩余 12分钟</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">申请人</p>
+                    <p class="text-gray-800 font-medium">李警官</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">申请时间</p>
+                    <p class="text-gray-800">2026-05-22 10:15</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">目标区域</p>
+                    <p class="text-gray-800 font-medium">医疗监区</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">计划结束</p>
+                    <p class="text-gray-800">15:30</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-xs text-gray-400 mb-1">流动事由</p>
+                    <p class="text-gray-800">因牙痛需要进行治疗，前往医疗监区就诊</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 审批流程时间线 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-clipboard-check text-gray-400"></i>
+                审批记录
+            </h3>
+            <div class="relative pl-6">
+                <div class="absolute left-2 top-1 bottom-2 w-0.5 bg-blue-200"></div>
+
+                <!-- 第1级: 监区审批 -->
+                <div class="relative mb-3">
+                    <div class="absolute left-0 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                    <div class="pl-6">
+                        <p class="text-sm font-medium text-gray-800">监区民警审批</p>
+                        <p class="text-xs text-green-600">已通过</p>
+                        <p class="text-xs text-gray-400">李警官 · 1-2监区 · 10:03</p>
+                    </div>
+                </div>
+
+                <!-- 第2级: 当前待审批 -->
+                <div class="relative">
+                    <div class="absolute left-0 w-4 h-4 rounded-full bg-orange-500 border-2 border-white animate-pulse"></div>
+                    <div class="pl-6">
+                        <p class="text-sm font-medium text-gray-800">狱政科审批</p>
+                        <p class="text-xs text-orange-500">待审批</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 流动人员 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-users text-gray-400"></i>
+                流动人员 (1人)
+            </h3>
+            <div class="person-card rounded-xl p-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">张某某 · 430100-0105</p>
+                        <p class="text-xs text-gray-400">1-2监区</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 审批操作 -->
+        <div class="space-y-2">
+            <button onclick="approveApplication()" class="action-btn w-full bg-green-500 text-white rounded-2xl py-4 text-sm font-semibold">
+                <i class="fas fa-check mr-2"></i>审批通过
+            </button>
+            <button onclick="rejectWithReason()" class="action-btn w-full bg-white border border-red-200 text-red-600 rounded-2xl py-3.5 text-sm font-medium">
+                <i class="fas fa-times mr-2"></i>驳回（需填写理由）
+            </button>
+            <button onclick="returnApplication()" class="action-btn w-full bg-gray-100 text-gray-600 rounded-2xl py-3.5 text-sm font-medium">
+                <i class="fas fa-reply mr-2"></i>退回补充材料
+            </button>
+        </div>
+    </div>
+
+    <!-- 驳回理由弹窗 -->
+    <div id="rejectModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white rounded-t-2xl w-full p-4 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-2">驳回理由</h3>
+            <textarea id="rejectReason" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none" rows="3" placeholder="请输入驳回理由"></textarea>
+            <button onclick="submitReject()" class="action-btn w-full bg-red-500 text-white rounded-xl py-3 text-sm font-medium mt-4">确认���回</button>
+            <button onclick="closeRejectModal()" class="action-btn w-full text-gray-400 py-2 text-sm mt-2">取消</button>
+        </div>
+    </div>
+
+    <!-- 退回弹窗 -->
+    <div id="returnModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white rounded-t-2xl w-full p-4 pb-8">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-2">退回原因</h3>
+            <textarea id="returnReason" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none" rows="3" placeholder="请输入需要补充的材料或原因"></textarea>
+            <button onclick="submitReturn()" class="action-btn w-full bg-orange-500 text-white rounded-xl py-3 text-sm font-medium mt-4">确认退回</button>
+            <button onclick="closeReturnModal()" class="action-btn w-full text-gray-400 py-2 text-sm mt-2">取消</button>
+        </div>
+    </div>
+
+    <script>
+        function approveApplication() {
+            if (confirm('确认通过该流动申请？')) {
+                alert('审批通过');
+                window.location.href = 'approve.html';
+            }
+        }
+
+        function rejectWithReason() {
+            document.getElementById('rejectModal').classList.remove('hidden');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+        }
+
+        function submitReject() {
+            const reason = document.getElementById('rejectReason').value;
+            if (!reason) {
+                alert('请输入驳回理由');
+                return;
+            }
+            alert('已驳回');
+            closeRejectModal();
+            window.location.href = 'approve.html';
+        }
+
+        function returnApplication() {
+            document.getElementById('returnModal').classList.remove('hidden');
+        }
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').classList.add('hidden');
+        }
+
+        function submitReturn() {
+            const reason = document.getElementById('returnReason').value;
+            if (!reason) {
+                alert('请输入退回原因');
+                return;
+            }
+            alert('已退回');
+            closeReturnModal();
+            window.location.href = 'approve.html';
+        }
+    </script>
+</body>
+</html>

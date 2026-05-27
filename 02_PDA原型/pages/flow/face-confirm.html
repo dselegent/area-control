@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>人脸确认 - PDA手持终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2874a6; }
+        * { font-family: 'Noto Sans SC', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        .nav-header { background: linear-gradient(145deg, #1a5276 0%, #2874a6 100%); }
+
+        .scan-frame {
+            border: 3px solid #10b981;
+            border-radius: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { border-color: #10b981; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { border-color: #34d399; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+
+        .success-animation {
+            animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .face-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a5276 0%, #2874a6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <!-- 顶部导航 -->
+    <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <a href="javascript:history.back()" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <h1 class="text-base font-semibold">人脸确认</h1>
+        <div class="text-white/80 text-xs">扫描中</div>
+    </div>
+
+    <!-- 确认信息 -->
+    <div class="px-4 py-3">
+        <div class="bg-gray-800 rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-white font-medium">李四 · 430100-0106</p>
+                    <p class="text-gray-400 text-xs">等待出监确认</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 扫描区域 -->
+    <div class="flex flex-col items-center justify-center p-8 mt-4">
+        <div class="scan-frame w-64 h-80 relative flex items-center justify-center">
+            <div class="face-icon">
+                <i class="fas fa-user text-white text-5xl"></i>
+            </div>
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent animate-scan"></div>
+        </div>
+
+        <p class="text-white text-center mt-6">
+            <i class="fas fa-camera mr-2"></i>请将人脸对准扫描框
+        </p>
+        <p class="text-gray-400 text-sm text-center mt-2">
+            建议在光线充足的环境下进行扫描
+        </p>
+    </div>
+
+    <!-- 提示信息 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-800 p-4">
+        <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2 text-gray-400">
+                <i class="fas fa-clock"></i>
+                <span>自动识别中...</span>
+            </div>
+            <div class="flex items-center gap-2 text-green-500">
+                <i class="fas fa-circle text-xs animate-pulse"></i>
+                <span>正在寻找人脸</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 识别成功弹窗 -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+        <div class="bg-gray-800 rounded-2xl p-6 text-center success-animation w-72">
+            <div class="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-white text-3xl"></i>
+            </div>
+            <h3 class="text-white font-semibold text-lg mb-2">识别成功</h3>
+            <div class="bg-gray-700 rounded-xl p-4 mb-4">
+                <div class="w-16 h-16 rounded-xl bg-gray-600 flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-user text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-white font-medium">李四</p>
+                <p class="text-gray-400 text-sm">430100-0106</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('successModal').classList.add('hidden')" class="flex-1 py-3 bg-gray-700 text-gray-300 rounded-xl">重新扫描</button>
+                <button onclick="confirmSuccess()" class="flex-1 py-3 bg-green-500 text-white rounded-xl">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let confirmType = new URLSearchParams(window.location.search).get('type') || 'out';
+
+        let scanInterval;
+
+        function startScan() {
+            scanInterval = setInterval(function() {
+                if (Math.random() > 0.7) {
+                    clearInterval(scanInterval);
+                    showSuccess();
+                }
+            }, 500);
+        }
+
+        function showSuccess() {
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function confirmSuccess() {
+            const typeText = confirmType === 'out' ? '出监' : confirmType === 'arrive' ? '到达' : '归监';
+            alert(typeText + '确认成功');
+            document.getElementById('successModal').classList.add('hidden');
+            // 返回上一页或详情页
+            window.location.href = 'detail.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            startScan();
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>流动审批 - 执勤干警APP</title>
+    <title>我的审批 - 执勤干警APP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
         .tab-btn { transition: all 0.2s; }
         .tab-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(26,82,118,0.08); }
 
-        .approve-card { transition: all 0.2s; }
+        .approve-card { transition: all 0.2s; cursor: pointer; }
         .approve-card:active { background: #f8fafc; }
 
         .action-btn { transition: all 0.2s; }
@@ -35,20 +35,23 @@
     <!-- 顶部导航 -->
     <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
-        <h1 class="text-base font-semibold">流动审批</h1>
+        <h1 class="text-base font-semibold">我的审批</h1>
         <span class="text-xs text-orange-300">待审批 3</span>
     </div>
 
     <div class="p-4 space-y-4">
         <!-- 筛选标签 -->
         <div class="flex gap-2 overflow-x-auto pb-1">
-            <button onclick="filterList(this)" class="tab-btn active flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">待审批 (3)</button>
-            <button onclick="filterList(this)" class="tab-btn flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">已审批</button>
-            <button onclick="filterList(this)" class="tab-btn flex-shrink-0 px-4 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">已驳回</button>
+            <button onclick="filterList(this, 'all')" class="tab-btn flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">全部 <span class="ml-1">(5)</span></button>
+            <button onclick="filterList(this, 'draft')" class="tab-btn flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">草稿 <span class="ml-1">(1)</span></button>
+            <button onclick="filterList(this, 'mine')" class="tab-btn flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">我提交的 <span class="ml-1">(2)</span></button>
+            <button onclick="filterList(this, 'pending')" class="tab-btn active flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">待审批 <span class="ml-1">(3)</span></button>
+            <button onclick="filterList(this, 'approved')" class="tab-btn flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">已审批 <span class="ml-1">(1)</span></button>
+            <button onclick="filterList(this, 'rejected')" class="tab-btn flex-shrink-0 px-3 py-1.5 text-xs rounded-full border-2 border-gray-200 text-gray-600">已驳回 <span class="ml-1">(1)</span></button>
         </div>
 
         <!-- 待审批卡片1 - 加急 -->
-        <div class="approve-card app-card rounded-2xl p-4 border-l-4 border-red-500">
+        <div onclick="window.location.href='approve-detail.html'" class="approve-card app-card rounded-2xl p-4 border-l-4 border-red-500 cursor-pointer">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">加急</span>
@@ -71,18 +74,15 @@
                 <button onclick="rejectFlow()" class="action-btn flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-2.5 text-sm font-medium">
                     <i class="fas fa-times mr-1"></i>驳回
                 </button>
-                <button class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">
-                    <i class="fas fa-phone"></i>
-                </button>
             </div>
         </div>
 
         <!-- 待审批卡片2 -->
-        <div class="approve-card app-card rounded-2xl p-4">
+        <div onclick="window.location.href='approve-detail.html'" class="approve-card app-card rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">普通</span>
-                    <span class="text-xs text-gray-500">教育学习</span>
+                    <span class="text-xs text-gray-500">教���学习</span>
                 </div>
                 <span class="text-xs text-gray-400">等待中</span>
             </div>
@@ -101,14 +101,11 @@
                 <button onclick="rejectFlow()" class="action-btn flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-2.5 text-sm font-medium">
                     <i class="fas fa-times mr-1"></i>驳回
                 </button>
-                <button class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">
-                    <i class="fas fa-phone"></i>
-                </button>
             </div>
         </div>
 
         <!-- 待审批卡片3 -->
-        <div class="approve-card app-card rounded-2xl p-4">
+        <div onclick="window.location.href='approve-detail.html'" class="approve-card app-card rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">普通</span>
@@ -121,7 +118,7 @@
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-gray-800">刘某某 · 430100-0112</p>
                     <p class="text-xs text-gray-500 mt-0.5">1-2监区 → 会见楼</p>
-                    <p class="text-xs text-gray-400 mt-1">申请人: 张警�� · 1-2监区 · 09:30提交</p>
+                    <p class="text-xs text-gray-400 mt-1">申请人: 张警官 · 1-2监区 · 09:30提交</p>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -130,9 +127,6 @@
                 </button>
                 <button onclick="rejectFlow()" class="action-btn flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-2.5 text-sm font-medium">
                     <i class="fas fa-times mr-1"></i>驳回
-                </button>
-                <button class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">
-                    <i class="fas fa-phone"></i>
                 </button>
             </div>
         </div>

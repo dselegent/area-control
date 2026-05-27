@@ -153,10 +153,11 @@
                 <!-- Tab切换 -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
                     <div class="flex border-b border-gray-100">
-                        <button class="tab-btn active text-sm font-medium" onclick="switchTab(this)">待出监确认 <span class="ml-1 text-xs bg-yellow-100 text-yellow-600 px-1.5 py-0.5 rounded">5</span></button>
+                        <button class="tab-btn active text-sm font-medium" onclick="switchTab(this)">全部</button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">待出监确认 <span class="ml-1 text-xs bg-yellow-100 text-yellow-600 px-1.5 py-0.5 rounded">5</span></button>
                         <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">流动中 <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">12</span></button>
                         <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">待归监确认 <span class="ml-1 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">3</span></button>
-                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">已完成</button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this)">完成流动</button>
                     </div>
                 </div>
 
@@ -166,6 +167,7 @@
                         <thead>
                             <tr class="bg-gray-50 border-b border-gray-100">
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700"><input type="checkbox" class="rounded"></th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">关联流动申请</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">罪犯姓名</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">编号</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">监区</th>
@@ -178,88 +180,113 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- 待出监 - 显示三个确认按钮 -->
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
                                 <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">张三的监内就医申请-202605240001</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-800">张三</td>
                                 <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0012</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">一监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">监内就医</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">王警官</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">14:00 - 15:30</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-05-22 14:00 - 15:30</td>
                                 <td class="px-4 py-3"><span class="status-tag status-wait-out">待出监</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button onclick="openModal('outModal')" class="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"><i class="fas fa-sign-out-alt mr-1"></i>出监确认</button>
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal('outModal')" class="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600">出监确认</button>
+                                        <button onclick="openModal('arriveModal')" class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">到达确认</button>
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">归监确认</button>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <!-- 已出监 - 显示已出监、到达确认、归监确认 -->
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 bg-green-50/30">
                                 <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">李警官的会见申请-202605240002</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-800">李四</td>
                                 <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0035</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">二监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">会见</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">会见楼</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">赵警官</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">14:30 - 16:00</td>
-                                <td class="px-4 py-3"><span class="status-tag status-wait-out">待出监</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-05-22 14:30 - 16:00</td>
+                                <td class="px-4 py-3"><span class="status-tag status-in-flow">已出监</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button onclick="openModal('outModal')" class="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"><i class="fas fa-sign-out-alt mr-1"></i>出监确认</button>
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal('outDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已出监</button>
+                                        <button onclick="openModal('arriveModal')" class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">到达确认</button>
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">归监确认</button>
                                     </div>
                                 </td>
                             </tr>
+                            <!-- 流动中 - 显示已出监、已到达、归监确认 -->
                             <tr class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/30">
                                 <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">刘警官的提审申请-202605240003</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-800">王五</td>
                                 <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0078</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">一监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">提审</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">提审室</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">刘警官</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">13:00 - 14:30</td>
-                                <td class="px-4 py-3"><span class="status-tag status-in-flow">流动中</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-05-22 13:00 - 14:30</td>
+                                <td class="px-4 py-3"><span class="status-tag status-in-flow">流动中 <span class="text-orange-500 ml-1">(还剩8分)</span></span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"><i class="fas fa-map-marker-alt mr-1"></i>追踪</button>
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal('outDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已出监</button>
+                                        <button onclick="openModal('arriveDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已到达</button>
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">归监确认</button>
                                     </div>
                                 </td>
                             </tr>
+                            <!-- 超时 - 显示已出监、已到达、归监确认 -->
                             <tr class="border-b border-gray-100 hover:bg-gray-50 timeout-orange">
                                 <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">陈警官的监内就医申请-202605240004</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-800">赵六</td>
                                 <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0091</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">三监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">监内就医</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">陈警官</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">11:00 - 12:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-05-22 11:00 - 12:00</td>
                                 <td class="px-4 py-3"><span class="status-tag status-timeout"><i class="fas fa-exclamation-triangle mr-1"></i>超时30min</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>归监确认</button>
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal('outDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已出监</button>
+                                        <button onclick="openModal('arriveDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已到达</button>
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">归监确认</button>
                                     </div>
                                 </td>
                             </tr>
+                            <!-- 待归监 - 显示已出监、已到达、归监确认 -->
                             <tr class="border-b border-gray-100 hover:bg-gray-50 bg-orange-50/30">
                                 <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">张警官的送餐送货申请-202605240005</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-800">孙七</td>
                                 <td class="px-4 py-3 text-sm text-gray-500 font-mono">PR-0103</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">二监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">送餐送货</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">食堂</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">张警官</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">11:30 - 12:30</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">2026-05-22 11:30 - 12:30</td>
                                 <td class="px-4 py-3"><span class="status-tag status-wait-back">待归监</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>归监确认</button>
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal('outDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已出监</button>
+                                        <button onclick="openModal('arriveDoneModal')" class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">已到达</button>
+                                        <button onclick="openModal('backModal')" class="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">归监确认</button>
                                     </div>
                                 </td>
                             </tr>
@@ -321,7 +348,6 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">确认方式 *</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="pda" class="text-blue-500"><i class="fas fa-qrcode text-blue-500"></i><span class="text-sm">PDA扫码</span></label>
                         <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="face" class="text-blue-500" checked><i class="fas fa-face-smile text-blue-500"></i><span class="text-sm">人脸识别</span></label>
                         <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="outMethod" value="manual" class="text-blue-500"><i class="fas fa-hand-pointer text-blue-500"></i><span class="text-sm">人工确认</span></label>
                     </div>
@@ -376,7 +402,6 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">确认方式 *</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="pda" class="text-blue-500"><i class="fas fa-qrcode text-blue-500"></i><span class="text-sm">PDA扫码</span></label>
                         <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="face" class="text-blue-500" checked><i class="fas fa-face-smile text-blue-500"></i><span class="text-sm">人脸识别</span></label>
                         <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="backMethod" value="manual" class="text-blue-500"><i class="fas fa-hand-pointer text-blue-500"></i><span class="text-sm">人工确认</span></label>
                     </div>
@@ -389,6 +414,118 @@
             <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
                 <button onclick="closeModal('backModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
                 <button onclick="closeModal('backModal')" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"><i class="fas fa-sign-in-alt mr-1"></i>确认归监</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗: 到达确认 -->
+    <div class="modal" id="arriveModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">到达确认</h3>
+                <button onclick="closeModal('arriveModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center gap-4 bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-user text-3xl"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-lg">王五</h4>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <span class="text-sm text-gray-500">编号: <span class="text-gray-800">PR-0078</span></span>
+                            <span class="text-sm text-gray-500">监区: <span class="text-gray-800">一监区</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">流动类型</p>
+                        <p class="text-sm font-medium">提审</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">目标区域</p>
+                        <p class="text-sm font-medium">提审室</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">出监时间</p>
+                        <p class="text-sm font-medium">2026-05-22 13:05</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-blue-600 mb-1">伴随民警</p>
+                        <p class="text-sm font-medium">刘警官</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">确认方式 *</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="arriveMethod" value="face" class="text-blue-500" checked><i class="fas fa-face-smile text-blue-500"></i><span class="text-sm">人脸识别</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-400 flex-1"><input type="radio" name="arriveMethod" value="manual" class="text-blue-500"><i class="fas fa-hand-pointer text-blue-500"></i><span class="text-sm">人工确认</span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('arriveModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="closeModal('arriveModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fas fa-check mr-1"></i>确认到达</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗: 详情 -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">申请详情</h3>
+                <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-semibold text-lg mb-3">张三的监内就医申请-202605240001</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="text-gray-500">申请单号:</span> <span class="font-medium">FL20260524001</span></div>
+                        <div><span class="text-gray-500">发起民警:</span> <span class="font-medium">张警官</span></div>
+                        <div><span class="text-gray-500">所属监区:</span> <span class="font-medium">1-1监区</span></div>
+                        <div><span class="text-gray-500">联系方式:</span> <span class="font-medium">138****8888</span></div>
+                        <div><span class="text-gray-500">流动人员:</span> <span class="font-medium">张三、李四</span></div>
+                        <div><span class="text-gray-500">流动类型:</span> <span class="font-medium">监内就医</span></div>
+                        <div><span class="text-gray-500">目标区域:</span> <span class="font-medium">医疗监区</span></div>
+                        <div><span class="text-gray-500">申请类型:</span> <span class="font-medium px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-sm">普通申请</span></div>
+                        <div><span class="text-gray-500">预计开始:</span> <span class="font-medium">2026-05-24 14:00</span></div>
+                        <div><span class="text-gray-500">预计结束:</span> <span class="font-medium">2026-05-24 15:30</span></div>
+                        <div><span class="text-gray-500">申请时间:</span> <span class="font-medium">2026-05-24 11:13</span></div>
+                        <div><span class="text-gray-500">当前状态:</span> <span class="font-medium"><span class="status-tag status-wait-out">待出监</span></span></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-sm text-gray-500 mb-1">流动事由:</div>
+                        <div class="text-sm">例行体检，需前往医疗监区进行血压、心电图检查</div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-sm text-gray-500 mb-1">陪同民警:</div>
+                        <div class="text-sm">王警官</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-700 mb-2">审批流程</h4>
+                    <div class="space-y-3">
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">发起申请</p>
+                            <p class="text-xs text-gray-500">张警官 - 2026-05-24 11:13 - 已通过</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">监区领导审批</p>
+                            <p class="text-xs text-gray-500">已通过 - 2026-05-24 11:30</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">狱政科审批</p>
+                            <p class="text-xs text-gray-500">已通过 - 2026-05-24 14:00</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">指挥中心</p>
+                            <p class="text-xs text-gray-500">已通过 - 2026-05-24 14:05</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('detailModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
             </div>
         </div>
     </div>
@@ -467,6 +604,63 @@
             btn.classList.add('active');
             btn.classList.remove('text-gray-600');
         }
+
+        // 保存草稿函数
+        function saveDraft() {
+            alert('已保存为草稿');
+            closeModal('applyModal');
+        }
+        // 提交申请函数
+        function submitApplication() {
+            alert('申请已提交，等待审批');
+            closeModal('applyModal');
+        }
     </script>
+
+    <!-- 弹窗: 已出监详情 -->
+    <div class="modal" id="outDoneModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">出监确认详情</h3>
+                <button onclick="closeModal('outDoneModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-500">确认人:</span> <span class="font-medium">王警官</span></div>
+                        <div><span class="text-gray-500">确认时间:</span> <span class="font-medium">2026-05-22 14:05</span></div>
+                        <div><span class="text-gray-500">确认方式:</span> <span class="font-medium">人脸识别</span></div>
+                        <div><span class="text-gray-500">确认地点:</span> <span class="font-medium">1-1监区大门</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('outDoneModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗: 已到达详情 -->
+    <div class="modal" id="arriveDoneModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">到达确认详情</h3>
+                <button onclick="closeModal('arriveDoneModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-500">确认人:</span> <span class="font-medium">刘警官</span></div>
+                        <div><span class="text-gray-500">确认时间:</span> <span class="font-medium">2026-05-22 13:10</span></div>
+                        <div><span class="text-gray-500">确认方式:</span> <span class="font-medium">人脸识别</span></div>
+                        <div><span class="text-gray-500">确认地点:</span> <span class="font-medium">提审室</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('arriveDoneModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

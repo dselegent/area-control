@@ -71,12 +71,20 @@
 <body class="pb-6">
     <!-- 顶部导航 -->
     <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <a href="#" onclick="handleBack(event)" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
         <h1 class="text-base font-semibold">流动申请</h1>
-        <a href="list.html" class="text-xs text-white/80">我的申请</a>
+        <button onclick="saveAsDraft()" class="text-xs text-white/80">存草稿</button>
     </div>
 
     <div class="p-4 space-y-4">
+        <!-- 发起民警 -->
+        <div class="form-card rounded-xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1">
+                <span class="text-red-500">*</span>发起民警
+            </h3>
+            <input type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm outline-none" value="张警官" placeholder="请输入发起民警姓名">
+        </div>
+
         <!-- 流动类型 -->
         <div class="form-card rounded-xl p-4">
             <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1">
@@ -121,7 +129,7 @@
             <div id="personList" class="space-y-2 mb-3"></div>
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="scanAddPerson()" class="action-btn bg-blue-50 text-blue-600 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2">
-                    <i class="fas fa-qrcode"></i><span>扫码添加</span>
+                    <i class="fas fa-user"></i><span>人脸添加</span>
                 </button>
                 <button onclick="showPersonSelect()" class="action-btn bg-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2">
                     <i class="fas fa-list"></i><span>手动选择</span>
@@ -129,13 +137,13 @@
             </div>
         </div>
 
-        <!-- 目的地 -->
+        <!-- 目标区域 -->
         <div class="form-card rounded-xl p-4">
             <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1">
-                <span class="text-red-500">*</span>目的地
+                <span class="text-red-500">*</span>目标区域
             </h3>
             <select class="input-field w-full px-4 py-3 rounded-xl text-sm outline-none">
-                <option value="">请选择目的地</option>
+                <option value="">请选择目标区域</option>
                 <option>医疗监区</option>
                 <option>会见楼</option>
                 <option>食堂</option>
@@ -219,15 +227,36 @@
             el.classList.add('selected');
         }
         let personCount = 0;
+
+        // 页面加载时检查是否有人脸扫描返回的人员
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedPersons = localStorage.getItem('flowPersons');
+            if (savedPersons) {
+                const persons = JSON.parse(savedPersons);
+                persons.forEach(p => addPersonToList(p.name, p.id));
+                localStorage.removeItem('flowPersons');
+            }
+        });
         function scanAddPerson() {
-            if (personCount >= 10) { alert('单次流动最多10人'); return; }
+            // 检查是否从人脸扫描页面返回
+            const savedPersons = localStorage.getItem('flowPersons');
+            if (savedPersons) {
+                const persons = JSON.parse(savedPersons);
+                if (persons.length > personCount) {
+                    const newPerson = persons[personCount];
+                    addPersonToList(newPerson.name, newPerson.id);
+                    localStorage.removeItem('flowPersons');
+                }
+            } else {
+                // 跳转到人脸扫描页面
+                window.location.href = 'face-scan.html';
+            }
+        }
+        function addPersonToList(name, id) {
+            const list = document.getElementById('personList');
+            list.innerHTML += `<div class="flex items-center gap-3 p-2.5 bg-blue-50 rounded-lg"><div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div><div class="flex-1"><p class="text-sm font-medium text-gray-800">${name}</p><p class="text-xs text-gray-400">${id}</p></div><button onclick="this.parentElement.remove(); personCount--; document.getElementById('personCount').textContent=personCount;" class="text-gray-400"><i class="fas fa-times"></i></button></div>`;
             personCount++;
             document.getElementById('personCount').textContent = personCount;
-            const list = document.getElementById('personList');
-            const names = ['张某某', '刘某某', '王某某', '李某某', '赵某某'];
-            const ids = ['430100-0105', '430100-0112', '430100-0201', '430100-0128', '430100-0089'];
-            const idx = personCount - 1;
-            list.innerHTML += `<div class="flex items-center gap-3 p-2.5 bg-blue-50 rounded-lg"><div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div><div class="flex-1"><p class="text-sm font-medium text-gray-800">${names[idx%5]}</p><p class="text-xs text-gray-400">${ids[idx%5]}</p></div><button onclick="this.parentElement.remove(); personCount--; document.getElementById('personCount').textContent=personCount;" class="text-gray-400"><i class="fas fa-times"></i></button></div>`;
         }
         function showPersonSelect() { document.getElementById('personModal').classList.remove('hidden'); }
         function hidePersonSelect() { document.getElementById('personModal').classList.add('hidden'); }
@@ -238,7 +267,63 @@
         function submitApply() {
             if (personCount === 0) { alert('请添加流动人员'); return; }
             alert('流动申请已提交，等待审批中...');
+            // 跳转到流动记录页面
+            window.location.href = 'list.html';
         }
+
+        // 返回时询问是否存草稿
+        function handleBack(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('input, textarea, select');
+            let hasContent = false;
+            inputs.forEach(input => {
+                if (input.value && input.value.trim()) hasContent = true;
+            });
+            if (hasContent || personCount > 0) {
+                document.getElementById('backModal').classList.remove('hidden');
+            } else {
+                window.location.href = '../../home.html';
+            }
+        }
+
+        function closeBackModal() {
+            document.getElementById('backModal').classList.add('hidden');
+        }
+
+        function saveDraftAndGoBack() {
+            alert('已保存为草稿');
+            closeBackModal();
+            window.location.href = 'list.html';
+        }
+
+        function discardAndGoBack() {
+            window.location.href = '../../home.html';
+        }
+
+        function saveAsDraft() {
+            alert('已保存为草稿');
+            window.location.href = 'list.html';
+        }
+
+        // 返回确认弹窗
     </script>
+
+    <!-- 返回确认弹窗 -->
+    <div id="backModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm">
+            <div class="text-center mb-4">
+                <div class="w-14 h-14 mx-auto rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                    <i class="fas fa-file-import text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800">是否保存为草稿？</h3>
+                <p class="text-sm text-gray-500 mt-1">您填写的内容将保存为草稿，下次可继续编辑</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="saveDraftAndGoBack()" class="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium">保存并退出</button>
+                <button onclick="discardAndGoBack()" class="w-full bg-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">不保存</button>
+                <button onclick="closeBackModal()" class="w-full text-gray-400 py-2 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -54,10 +54,10 @@
         <!-- 筛选标签 -->
         <div class="flex gap-2 overflow-x-auto">
             <button onclick="filterList(this)" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
-            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">进行中</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">草稿</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">流动中</button>
             <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">审批中</button>
-            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">已完成</button>
-            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">超时</button>
+            <button onclick="filterList(this)" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">完成流动</button>
         </div>
 
         <!-- 统计卡片 -->
@@ -78,7 +78,7 @@
 
         <!-- 记录列表 -->
         <div class="space-y-3">
-            <div class="flow-card flow-overdue rounded-xl p-4">
+            <a href="detail.html?status=timeout" class="block flow-card flow-overdue rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="tag tag-overdue">超时</span>
@@ -87,10 +87,10 @@
                     <span class="text-xs text-red-500 font-medium">超时 23分钟</span>
                 </div>
                 <p class="text-sm font-medium text-gray-800">王某某 · 430100-0201</p>
-                <p class="text-xs text-gray-500">1-2监区 → 食堂 · 09:30出发</p>
-            </div>
+                <p class="text-xs text-gray-500">1-2监区 → 食堂 · 2026-05-22 09:30出发</p>
+            </a>
 
-            <div class="flow-card flow-progress rounded-xl p-4">
+            <a href="detail.html?status=progress" class="block flow-card flow-progress rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="tag tag-progress">进行中</span>
@@ -99,10 +99,10 @@
                     <span class="text-xs text-orange-500 font-medium">剩余 18分钟</span>
                 </div>
                 <p class="text-sm font-medium text-gray-800">张某某 · 430100-0105</p>
-                <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 10:23出发</p>
-            </div>
+                <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 2026-05-22 10:23出发</p>
+            </a>
 
-            <div class="flow-card flow-pending rounded-xl p-4">
+            <a href="detail.html?status=pending" class="block flow-card flow-pending rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="tag tag-pending">审批中</span>
@@ -111,20 +111,20 @@
                     <span class="text-xs text-gray-500">等待审批</span>
                 </div>
                 <p class="text-sm font-medium text-gray-800">赵某某 · 430100-0089</p>
-                <p class="text-xs text-gray-500">1-2监区 → 教学楼 · 09:45提交</p>
-            </div>
+                <p class="text-xs text-gray-500">1-2监区 → 教学楼 · 2026-05-22 09:45提交</p>
+            </a>
 
-            <div class="flow-card flow-done rounded-xl p-4">
+            <a href="detail.html?status=done" class="block flow-card flow-done rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
-                        <span class="tag tag-done">已完成</span>
+                        <span class="tag tag-done">完成流动</span>
                         <span class="text-xs text-gray-400">监内就医</span>
                     </div>
                     <span class="text-xs text-green-600">已归档</span>
                 </div>
                 <p class="text-sm font-medium text-gray-800">陈某某 · 430100-0089</p>
                 <p class="text-xs text-gray-500">1-2监区 → 医疗监区 · 08:00-09:15</p>
-            </div>
+            </a>
         </div>
 
         <div class="h-4"></div>

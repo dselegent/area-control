@@ -38,6 +38,7 @@
             border: 1px solid rgba(226,232,240,0.8);
             box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
             transition: all 0.2s;
+            cursor: pointer;
         }
         .flow-card:active {
             background: #f8fafc;
@@ -80,66 +81,75 @@
     </div>
 
     <div class="p-4 space-y-3">
-        <!-- 在途人员提醒 -->
-        <div class="warning-banner rounded-xl p-3 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                <i class="fas fa-person-walking-with-cane text-orange-500"></i>
-            </div>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-orange-800">当前在途: 3人</p>
-                <p class="text-xs text-orange-600">2人即将超时</p>
-            </div>
-            <i class="fas fa-chevron-right text-orange-400"></i>
-        </div>
+        <!-- 在途统计文字 -->
+        <p class="text-xs text-orange-600 mb-1">
+            <i class="fas fa-info-circle mr-1"></i>当前在途: 3人，<span class="text-red-500">2人即将超时</span>
+        </p>
 
         <!-- 筛选标签 -->
         <div class="flex gap-2 overflow-x-auto pb-1">
-            <button onclick="filterFlow(this, 'all')" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
-            <button onclick="filterFlow(this, 'progress')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">进行中</button>
-            <button onclick="filterFlow(this, 'pending')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">审批中</button>
-            <button onclick="filterFlow(this, 'done')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">已完成</button>
-            <button onclick="filterFlow(this, 'timeout')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">超时</button>
+            <button onclick="filterFlow(this, 'all')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">全部</button>
+            <button onclick="filterFlow(this, 'draft')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">草稿</button>
+            <button onclick="filterFlow(this, 'pending')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">待审批</button>
+            <button onclick="filterFlow(this, 'progress')" class="filter-tag active flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">流动中</button>
+            <button onclick="filterFlow(this, 'done')" class="filter-tag flex-shrink-0 px-4 py-2 text-xs rounded-full text-gray-600">流动结束</button>
         </div>
 
         <!-- 流动记录列表 -->
         <div class="space-y-3">
-            <!-- 进行中 -->
-            <div class="flow-card rounded-xl p-4">
+            <!-- 流动中 - 多人员逐人确认 -->
+            <div onclick="window.location.href='detail.html'" class="flow-card rounded-xl p-4 cursor-pointer">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
-                        <span class="tag tag-progress">进行中</span>
+                        <span class="tag tag-progress">流动中</span>
                         <span class="text-xs text-gray-400">监内就医</span>
                     </div>
                     <span class="text-xs text-orange-500 font-medium">剩余 18分钟</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                        <i class="fas fa-user text-gray-400"></i>
+                <p class="text-xs text-gray-500 mb-3">张三的监内就医申请-202605240001 · 目标区域: 医疗监区 · 计划结束: 15:30</p>
+
+                <!-- 流动人员列表 - 逐人确认 -->
+                <div class="space-y-2 mb-3">
+                    <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">张三 · 430100-0105</p>
+                                <p class="text-xs text-green-600">已出监 · 已到达</p>
+                            </div>
+                        </div>
+                        <button onclick="event.stopPropagation(); openConfirmModal('out')" class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">已出监</button>
                     </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-800">张某某 · 430100-0105</p>
-                        <p class="text-xs text-gray-500">1-2监区 → 医疗监区</p>
+                    <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">李四 · 430100-0106</p>
+                                <p class="text-xs text-green-600">已出监</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="event.stopPropagation(); openConfirmModal('arrive')" class="text-xs px-2 py-1 bg-blue-500 text-white rounded">到达确认</button>
+                            <button onclick="event.stopPropagation(); openConfirmModal('back')" class="text-xs px-2 py-1 bg-orange-500 text-white rounded">归监确认</button>
+                        </div>
                     </div>
                 </div>
+
                 <div class="flex items-center justify-between text-xs text-gray-400">
-                    <span><i class="fas fa-clock mr-1"></i>10:23 出发</span>
-                    <div class="flex gap-2">
-                        <button class="action-btn bg-green-50 text-green-600">扫码出发</button>
-                        <button class="action-btn bg-blue-50 text-blue-600">扫码到达</button>
-                        <button class="action-btn bg-gray-100 text-gray-600">结束</button>
-                    </div>
+                    <span><i class="fas fa-clock mr-1"></i>2026-05-22 10:23 出发</span>
                 </div>
             </div>
 
-            <!-- 进行中2 -->
-            <div class="flow-card rounded-xl p-4">
+            <!-- 流动中 - 待出监 -->
+            <div onclick="window.location.href='detail.html'" class="flow-card rounded-xl p-4 cursor-pointer">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
-                        <span class="tag tag-progress">进行中</span>
+                        <span class="tag tag-progress">流动中</span>
                         <span class="text-xs text-gray-400">会见</span>
                     </div>
                     <span class="text-xs text-gray-500 font-medium">剩余 45分钟</span>
                 </div>
+                <p class="text-xs text-gray-500 mb-3">李警官的会见申请-202605240002 · 目标区域: 会见楼 · 计划结束: 16:00</p>
                 <div class="flex items-center gap-3 mb-3">
                     <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
                         <i class="fas fa-user text-gray-400"></i>
@@ -150,17 +160,17 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-400">
-                    <span><i class="fas fa-clock mr-1"></i>10:15 出发</span>
+                    <span><i class="fas fa-clock mr-1"></i>2026-05-22 10:15 出发</span>
                     <div class="flex gap-2">
-                        <button class="action-btn bg-green-50 text-green-600">扫码出发</button>
-                        <button class="action-btn bg-blue-50 text-blue-600">扫码到达</button>
-                        <button class="action-btn bg-gray-100 text-gray-600">结束</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('out')" class="action-btn bg-green-50 text-green-600">出监确认</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('arrive')" class="action-btn bg-blue-50 text-blue-600">到达确认</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('back')" class="action-btn bg-orange-50 text-orange-600">归监确认</button>
                     </div>
                 </div>
             </div>
 
             <!-- 超时 -->
-            <div class="flow-card rounded-xl p-4 border-l-3 border-red-500">
+            <div onclick="window.location.href='detail.html?status=timeout'" class="flow-card rounded-xl p-4 border-l-3 border-red-500 cursor-pointer">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <span class="tag tag-timeout">超时</span>
@@ -168,6 +178,7 @@
                     </div>
                     <span class="text-xs text-red-500 font-medium">超时 23分钟</span>
                 </div>
+                <p class="text-xs text-gray-500 mb-3">王警官的送餐送货申请-202605240003 · 目标区域: 食堂 · 计划结束: 12:30</p>
                 <div class="flex items-center gap-3 mb-3">
                     <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
                         <i class="fas fa-user text-gray-400"></i>
@@ -178,20 +189,21 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-400">
-                    <span><i class="fas fa-clock mr-1"></i>09:30 出发</span>
+                    <span><i class="fas fa-clock mr-1"></i>2026-05-22 09:30 出发</span>
                     <button class="action-btn bg-red-50 text-red-600">立即处理</button>
                 </div>
             </div>
 
-            <!-- 审批中 -->
-            <div class="flow-card rounded-xl p-4">
+            <!-- 待审批 -->
+            <div onclick="window.location.href='detail.html?status=pending'" class="flow-card rounded-xl p-4 cursor-pointer">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
-                        <span class="tag tag-pending">审批中</span>
+                        <span class="tag tag-pending">待审批</span>
                         <span class="text-xs text-gray-400">教育学习</span>
                     </div>
                     <span class="text-xs text-gray-500">等待审批</span>
                 </div>
+                <p class="text-xs text-gray-500 mb-3">赵警官的教育学习申请-202605240004 · 目标区域: 教学楼 · 计划结束: 17:00</p>
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
                         <i class="fas fa-user text-gray-400"></i>
@@ -202,13 +214,13 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-400 mt-2">
-                    <span><i class="fas fa-clock mr-1"></i>09:45 提交</span>
+                    <span><i class="fas fa-clock mr-1"></i>2026-05-22 09:45 提交</span>
                     <span class="text-xs text-yellow-600">等待狱政科审批</span>
                 </div>
             </div>
 
             <!-- 已完成 -->
-            <div class="flow-card rounded-xl p-4 opacity-60">
+            <div onclick="window.location.href='detail.html?status=done'" class="flow-card rounded-xl p-4 opacity-60 cursor-pointer">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <span class="tag tag-done">已完成</span>
@@ -236,29 +248,105 @@
         <a href="../../home.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-home text-lg"></i></div>
             <span class="text-[11px] mt-1">首页</span>
-        </a>
+        </div>
         <a href="../call/task.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-clipboard-check text-lg"></i></div>
             <span class="text-[11px] mt-1">点名</span>
-        </a>
+        </div>
         <a href="../id-check/scan.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-qrcode text-lg"></i></div>
             <span class="text-[11px] mt-1">扫码</span>
-        </a>
+        </div>
         <a href="list.html" class="tab-active flex flex-col items-center py-1.5 px-4 rounded-xl">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-person-walking-with-cane text-lg"></i></div>
             <span class="text-[11px] mt-1">流动</span>
-        </a>
+        </div>
         <a href="../profile/index.html" class="flex flex-col items-center py-1.5 px-4 text-gray-400">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-user text-lg"></i></div>
             <span class="text-[11px] mt-1">我的</span>
-        </a>
+        </div>
     </nav>
 
     <script>
         function filterFlow(btn, type) {
             document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+        }
+
+        // 确认弹窗
+        function openConfirmModal(type) {
+            const titleMap = { out: '出监确认', arrive: '到达确认', back: '归监确认' };
+            const btnText = titleMap[type] || '确认';
+            // 确认弹窗
+            let html = `<div id="confirmModal" class="fixed inset-0 bg-black/60 z-50 flex items-end">
+                <div class="modal-card w-full p-6 pb-8 max-h-[70vh] flex flex-col">
+                    <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+                    <h3 class="text-base font-semibold text-gray-800 mb-4">${btnText}</h3>
+                    <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>
+                            <div><p class="text-sm font-medium text-gray-800">张某某</p><p class="text-xs text-gray-400">430100-0105</p></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                            <div>流动类型: 监内就医</div>
+                            <div>目标区域: 医疗监区</div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">确认方式</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="selectConfirm(this, 'face')" class="duration-btn rounded-lg text-xs p-3 text-center active">人脸识别</button>
+                            <button onclick="selectConfirm(this, 'manual')" class="duration-btn rounded-lg text-xs p-3 text-center text-gray-600">人工确认</button>
+                        </div>
+                    </div>
+                    <button onclick="confirmAction('${type}')" class="action-btn w-full bg-blue-600 text-white rounded-xl py-3.5 text-sm font-medium">确认</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 已确认详情弹窗
+        function openDoneModal(type) {
+            const titleMap = { out: '已出监', arrive: '已到达', back: '已归监' };
+            const btnText = titleMap[type] || '已确认';
+            const infoMap = {
+                out: { person: '张某某', time: '2026-05-22 10:05', method: '人脸识别', location: '1-1监区大门' },
+                arrive: { person: '王警官', time: '2026-05-22 10:15', method: '人脸识别', location: '医疗监区' },
+                back: { person: '李警官', time: '2026-05-22 11:30', method: '人工确认', location: '1-1监区大门' }
+            };
+            const info = infoMap[type];
+            let html = `<div id="doneModal" class="fixed inset-0 bg-black/60 z-50 flex items-end">
+                <div class="modal-card w-full p-6 pb-8 max-h-[70vh] flex flex-col">
+                    <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+                    <h3 class="text-base font-semibold text-gray-800 mb-4">${btnText}详情</h3>
+                    <div class="bg-green-50 rounded-xl p-4 mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div>
+                            <div><p class="text-sm font-medium text-gray-800">${info.person}</p><p class="text-xs text-green-600">已确认</p></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="text-gray-500">确认时间: <span class="text-gray-800">${info.time}</span></div>
+                            <div class="text-gray-500">确认方式: <span class="text-gray-800">${info.method}</span></div>
+                            <div class="text-gray-500">确认地点: <span class="text-gray-800">${info.location}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('doneModal').classList.add('hidden')" class="action-btn w-full bg-gray-100 text-gray-600 rounded-xl py-3.5 text-sm font-medium">关闭</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 确认操作
+        function confirmAction(type) {
+            document.getElementById('confirmModal').classList.add('hidden');
+            alert(type === 'out' ? '出监确认成功' : type === 'arrive' ? '到达确认成功' : '归监确认成功');
+            // 刷新页面以更新状态
+            window.location.reload();
+        }
+
+        function selectConfirm(el, type) {
+            document.querySelectorAll('.duration-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-gray-600'); });
+            el.classList.add('active');
         }
     </script>
 </body>

@@ -162,10 +162,11 @@
                 <!-- 标签页 -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
                     <div class="flex border-b border-gray-100">
-                        <button class="tab-btn active text-sm font-medium" onclick="switchTab(this, 'pending')">待审批 <span class="ml-1 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">5</span></button>
-                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'approved')">已通过</button>
-                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'progress')">进行中 <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">12</span></button>
-                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'completed')">已结束</button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'all')">全部</button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'draft')">草稿 <span class="ml-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">3</span></button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'pending')">待审批 <span class="ml-1 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">5</span></button>
+                        <button class="tab-btn active text-sm font-medium" onclick="switchTab(this, 'progress')">流动中 <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">12</span></button>
+                        <button class="tab-btn text-sm font-medium text-gray-600" onclick="switchTab(this, 'completed')">流动结束</button>
                     </div>
 
                     <!-- 搜索区域 -->
@@ -211,8 +212,6 @@
                     <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                         <div class="flex gap-2">
                             <button onclick="openModal('applyModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1"><i class="fas fa-plus"></i>发起申请</button>
-                            <button onclick="openModal('executeModal')" class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 flex items-center gap-1"><i class="fas fa-check-circle"></i>流动执行</button>
-                            <button onclick="openModal('trackModal')" class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 flex items-center gap-1"><i class="fas fa-map-marker-alt"></i>实时追踪</button>
                             <button class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-download"></i>导出</button>
                         </div>
                     </div>
@@ -221,6 +220,7 @@
                     <table class="w-full">
                         <thead>
                             <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">标题</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">发起民警</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">罪犯名称</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">创建时间</th>
@@ -233,62 +233,70 @@
                         </thead>
                         <tbody>
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">张三的会见申请-202605240001</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-800">张警官</td>
                                 <td class="px-4 py-3 text-sm text-gray-800">张三、李四</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">2026-03-26 11:13</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-05-24 11:13</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">1-1监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">医疗监区</td>
                                 <td class="px-4 py-3"><span class="status-tag status-pending">监内就医</span></td>
-                                <td class="px-4 py-3"><span class="status-tag status-pending">发起待审批</span></td>
+                                <td class="px-4 py-3"><span class="status-tag bg-gray-100 text-gray-500">草稿</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm" onclick="openModal('approveModal')">审批</button>
-                                        <button class="text-gray-500 hover:text-gray-600 text-sm">详情</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm" onclick="openModal('detailModal')">编辑并提交</button>
                                     </div>
                                 </td>
                             </tr>
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">李警官的会见申请-202605240002</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-800">李警官</td>
                                 <td class="px-4 py-3 text-sm text-gray-800">王五</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">2026-03-26 11:06</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-05-24 11:06</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">1-2监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">会见楼</td>
                                 <td class="px-4 py-3"><span class="status-tag status-pending">会见</span></td>
-                                <td class="px-4 py-3"><span class="status-tag status-pending">发起待审批</span></td>
+                                <td class="px-4 py-3"><span class="status-tag status-pending">待审批</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm">审批</button>
-                                        <button class="text-gray-500 hover:text-gray-600 text-sm">详情</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm" onclick="openModal('approveModal')">审批</button>
                                     </div>
                                 </td>
                             </tr>
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">王警官的教育学习申请-202605240003</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-800">王警官</td>
                                 <td class="px-4 py-3 text-sm text-gray-800">赵六等5人</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">2026-03-26 10:28</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-05-24 10:28</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">2-1监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">教学楼</td>
                                 <td class="px-4 py-3"><span class="status-tag status-pending">教育学习</span></td>
-                                <td class="px-4 py-3"><span class="status-tag status-progress">狱政科审批中</span></td>
+                                <td class="px-4 py-3"><span class="status-tag status-progress">流动中</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
                                         <button class="text-blue-500 hover:text-blue-600 text-sm">审批</button>
-                                        <button class="text-gray-500 hover:text-gray-600 text-sm">详情</button>
                                     </div>
                                 </td>
                             </tr>
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-600 hover:text-blue-700 font-medium text-sm text-left" onclick="openModal('detailModal')">赵警官的送餐送货申请-202605240004</button>
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-800">赵警官</td>
                                 <td class="px-4 py-3 text-sm text-gray-800">钱七</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">2026-03-26 09:42</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">2026-05-24 09:42</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">3-1监区</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">食堂</td>
                                 <td class="px-4 py-3"><span class="status-tag status-pending">送餐送货</span></td>
-                                <td class="px-4 py-3"><span class="status-tag status-warning">已超时</span></td>
+                                <td class="px-4 py-3"><span class="status-tag status-warning">流动结束</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
                                         <button class="text-red-500 hover:text-red-600 text-sm">催办</button>
-                                        <button class="text-gray-500 hover:text-gray-600 text-sm">详情</button>
                                     </div>
                                 </td>
                             </tr>
@@ -322,6 +330,10 @@
             </div>
             <div class="p-4">
                 <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">发起民警 *</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500" value="张警官" placeholder="请输入发起民警姓名">
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">流动人员 *</label>
                         <div class="border border-gray-200 rounded-lg p-3">
@@ -388,8 +400,9 @@
                 </form>
             </div>
             <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="saveDraft()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">保存草稿</button>
                 <button onclick="closeModal('applyModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
-                <button onclick="closeModal('applyModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">提交申请</button>
+                <button onclick="submitApplication()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">提交申请</button>
             </div>
         </div>
     </div>
@@ -443,7 +456,7 @@
                         <div><span class="text-gray-500">流动类型:</span> <span class="font-medium">监内就医</span></div>
                         <div><span class="text-gray-500">目标区域:</span> <span class="font-medium">医疗监区</span></div>
                         <div><span class="text-gray-500">预计时间:</span> <span class="font-medium">11:30 - 12:00</span></div>
-                        <div><span class="text-gray-500">紧急程度:</span> <span class="font-medium"><select class="border border-gray-200 rounded px-2 py-0.5 text-sm outline-none"><option>普通 (2小时)</option><option>加急 (30分钟)</option></select></span></div>
+                        <div><span class="text-gray-500">紧急程度:</span> <span class="font-medium px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-sm">普通申请</span></div>
                         <div><span class="text-gray-500">申请时间:</span> <span class="font-medium">2026-03-26 11:13</span></div>
                     </div>
                     <div class="mt-3"><span class="text-gray-500">流动事由:</span> <span>例行体检，需前往医疗监区进行血压、心电图检查</span></div>
@@ -476,6 +489,78 @@
                 <button onclick="closeModal('approveModal')" class="px-4 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50">驳回</button>
                 <button onclick="closeModal('approveModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">退回</button>
                 <button onclick="closeModal('approveModal')" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">通过</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 审批详情弹窗 -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-lg">审批详情</h3>
+                <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-500">申请单号:</span> <span class="font-medium">FL20260326001</span></div>
+                        <div><span class="text-gray-500">发起民警:</span> <span class="font-medium">张警官</span></div>
+                        <div><span class="text-gray-500">所属监区:</span> <span class="font-medium">1-1监区</span></div>
+                        <div><span class="text-gray-500">联系方式:</span> <span class="font-medium">138****8888</span></div>
+                        <div><span class="text-gray-500">流动人员:</span> <span class="font-medium">张三、李四</span></div>
+                        <div><span class="text-gray-500">流动类型:</span> <span class="font-medium">监内就医</span></div>
+                        <div><span class="text-gray-500">目标区域:</span> <span class="font-medium">医疗监区</span></div>
+                        <div><span class="text-gray-500">申请类型:</span> <span class="font-medium px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-sm">普通申请</span></div>
+                        <div><span class="text-gray-500">预计开始:</span> <span class="font-medium">2026-03-26 11:30</span></div>
+                        <div><span class="text-gray-500">预计结束:</span> <span class="font-medium">2026-03-26 12:00</span></div>
+                        <div><span class="text-gray-500">申请时间:</span> <span class="font-medium">2026-03-26 11:13</span></div>
+                        <div><span class="text-gray-500">当前状态:</span> <span class="font-medium"><span class="status-tag status-pending">待审批</span></span></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-sm text-gray-500 mb-1">流动事由:</div>
+                        <div class="text-sm">例行体检，需前往医疗监区进行血压、心电图检查</div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-sm text-gray-500 mb-1">陪同民警:</div>
+                        <div class="text-sm">李警官</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-700 mb-2">审批流程</h4>
+                    <div class="space-y-3">
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">发起申请</p>
+                            <p class="text-xs text-gray-500">张警官 - 2026-03-26 11:13</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">监区领导审批</p>
+                            <p class="text-xs text-gray-500">待处理</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm text-gray-400">狱政科审批</p>
+                            <p class="text-xs text-gray-400">待处理</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm text-gray-400">指挥中心备案</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-700 mb-2">审批历史</h4>
+                    <div class="space-y-3">
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">发起申请</p>
+                            <p class="text-xs text-gray-500">张警官 - 1-1监区 - 2026-03-26 11:13 - 已通过</p>
+                        </div>
+                        <div class="timeline-item">
+                            <p class="text-sm font-medium">监区领导审批</p>
+                            <p class="text-xs text-gray-500">待审批</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="closeModal('detailModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">关闭</button>
             </div>
         </div>
     </div>
@@ -591,6 +676,17 @@
                 document.getElementById('countdownProgress').className = 'bg-orange-500 h-2 rounded-full transition-all duration-1000';
             }
         }, 1000);
+
+        // 保存草稿函数
+        function saveDraft() {
+            alert('已保存为草稿');
+            closeModal('applyModal');
+        }
+        // 提交申请函数
+        function submitApplication() {
+            alert('申请已提交，等待审批');
+            closeModal('applyModal');
+        }
     </script>
 
     <!-- 流动执行弹窗 -->

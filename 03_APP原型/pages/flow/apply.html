@@ -34,12 +34,20 @@
 <body class="pb-6">
     <!-- 顶部导航 -->
     <div class="nav-header text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-        <a href="../../home.html" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
+        <a href="#" onclick="handleBack(event)" class="text-white"><i class="fas fa-arrow-left text-lg"></i></a>
         <h1 class="text-base font-semibold">发起流动申请</h1>
-        <div class="text-white/80 text-xs">草稿</div>
+        <button onclick="saveAsDraft()" class="text-white/80 text-xs">存草稿</button>
     </div>
 
     <div class="p-4 space-y-4">
+        <!-- 发起民警 -->
+        <div class="app-card rounded-2xl p-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1">
+                <span class="text-red-500">*</span>发起民警
+            </h3>
+            <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50" value="张警官" placeholder="请输入发起民警姓名">
+        </div>
+
         <!-- 流动类型 -->
         <div class="app-card rounded-2xl p-4">
             <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1">
@@ -62,9 +70,14 @@
                     <span class="text-red-500">*</span>流动人员
                     <span class="text-xs text-gray-400 font-normal">(单次≤10人)</span>
                 </h3>
-                <button class="text-xs text-blue-600 flex items-center gap-1">
-                    <i class="fas fa-plus"></i>添加人员
-                </button>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="scanAddPerson()" class="action-btn bg-blue-50 text-blue-600 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-camera"></i><span>人脸添加</span>
+                    </button>
+                    <button onclick="showPersonSelect()" class="action-btn bg-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-list"></i><span>手动选择</span>
+                    </button>
+                </div>
             </div>
             <div class="space-y-2" id="personList">
                 <div class="person-item flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
@@ -78,14 +91,14 @@
             </div>
         </div>
 
-        <!-- 目的地与事由 -->
+        <!-- 目标区域与事由 -->
         <div class="app-card rounded-2xl p-4 space-y-4">
             <div>
                 <label class="text-sm text-gray-600 mb-2 block flex items-center gap-1">
-                    <span class="text-red-500">*</span>目的地
+                    <span class="text-red-500">*</span>目标区域
                 </label>
                 <select class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-gray-50">
-                    <option>请选择目的地</option>
+                    <option>请选择目标区域</option>
                     <option>医疗监区</option>
                     <option>会见楼</option>
                     <option>教学楼</option>
@@ -132,7 +145,141 @@
         <div class="h-4"></div>
     </div>
 
+    <!-- 人员选择弹窗 -->
+    <div id="personModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end">
+        <div class="bg-white rounded-t-2xl w-full p-4 pb-8 max-h-[70vh] flex flex-col">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-base font-semibold text-gray-800 mb-3">选择流动人员</h3>
+            <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none mb-3" placeholder="搜索姓名或编号">
+            <div class="flex-1 overflow-y-auto space-y-2">
+                <div onclick="selectPerson(this, '张某某', '430100-0105')" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">张某某</p><p class="text-xs text-gray-400">430100-0105 · 1-2监区</p></div>
+                    <i class="fas fa-check text-green-500 hidden"></i>
+                </div>
+                <div onclick="selectPerson(this, '李某某', '430100-0106')" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">李某某</p><p class="text-xs text-gray-400">430100-0106 · 1-2监区</p></div>
+                    <i class="fas fa-check text-green-500 hidden"></i>
+                </div>
+                <div onclick="selectPerson(this, '王某某', '430100-0107')" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                    <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium text-gray-800">王某某</p><p class="text-xs text-gray-400">430100-0107 · 1-2监区</p></div>
+                    <i class="fas fa-check text-green-500 hidden"></i>
+                </div>
+            </div>
+            <button onclick="hidePersonSelect()" class="action-btn w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium mt-4">确认选择</button>
+        </div>
+    </div>
+
+    <!-- 返回确认弹窗 -->
+    <div id="backModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm">
+            <div class="text-center mb-4">
+                <div class="w-14 h-14 mx-auto rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                    <i class="fas fa-file-import text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800">是否保存为草稿？</h3>
+                <p class="text-sm text-gray-500 mt-1">您填写的内容将保存为草稿，下次可继续编辑</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="saveDraftAndGoBack()" class="action-btn w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium">保存并退出</button>
+                <button onclick="discardAndGoBack()" class="action-btn w-full bg-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">不保存</button>
+                <button onclick="closeBackModal()" class="action-btn w-full text-gray-400 py-2 text-sm">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let personCount = 0;
+        let selectedPersons = [];
+
+        function handleBack(e) {
+            e.preventDefault();
+            // Check if there's any content entered
+            const inputs = document.querySelectorAll('input, textarea, select');
+            let hasContent = false;
+            inputs.forEach(input => {
+                if (input.value && input.value.trim()) hasContent = true;
+            });
+            if (hasContent || personCount > 0) {
+                document.getElementById('backModal').classList.remove('hidden');
+            } else {
+                window.location.href = '../../home.html';
+            }
+        }
+
+        function closeBackModal() {
+            document.getElementById('backModal').classList.add('hidden');
+        }
+
+        function saveDraftAndGoBack() {
+            alert('已保存为草稿');
+            closeBackModal();
+            window.location.href = '../../home.html';
+        }
+
+        function discardAndGoBack() {
+            closeBackModal();
+            window.location.href = '../../home.html';
+        }
+
+        function saveAsDraft() {
+            alert('已保存为草稿');
+            window.location.href = '../../home.html';
+        }
+
+        function scanAddPerson() {
+            // 跳转到人脸扫描页面
+            window.location.href = 'face-scan.html';
+        }
+
+        function showPersonSelect() {
+            document.getElementById('personModal').classList.remove('hidden');
+        }
+
+        function hidePersonSelect() {
+            document.getElementById('personModal').classList.add('hidden');
+        }
+
+        function selectPerson(el, name, id) {
+            // Toggle selection
+            const checkIcon = el.querySelector('.fa-check');
+            if (checkIcon.classList.contains('hidden')) {
+                if (personCount >= 10) {
+                    alert('最多添加10人');
+                    return;
+                }
+                checkIcon.classList.remove('hidden');
+                el.classList.add('bg-green-50');
+                selectedPersons.push({ name, id });
+                addPersonToList(name, id);
+            } else {
+                checkIcon.classList.add('hidden');
+                el.classList.remove('bg-green-50');
+                selectedPersons = selectedPersons.filter(p => p.id !== id);
+                removePersonFromList(id);
+            }
+        }
+
+        function addPersonToList(name, id) {
+            const list = document.getElementById('personList');
+            list.innerHTML += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-user text-sm"></i></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">${name}</p>
+                    <p class="text-xs text-gray-400">${id} · 1-2监区</p>
+                </div>
+                <button onclick="removePersonFromList('${id}'); this.parentElement.remove();" class="text-gray-400"><i class="fas fa-times"></i></button>
+            </div>`;
+            personCount++;
+        }
+
+        function removePersonFromList(id) {
+            selectedPersons = selectedPersons.filter(p => p.id !== id);
+            personCount--;
+        }
+
         function selectType(btn) {
             document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -146,6 +293,10 @@
             btn.classList.remove('text-gray-500');
         }
         function submitApply() {
+            if (selectedPersons.length === 0) {
+                alert('请添加流动人员');
+                return;
+            }
             if (confirm('确认提交流动申请？')) {
                 alert('申请已提交，等待审批');
                 window.location.href = 'list.html';
