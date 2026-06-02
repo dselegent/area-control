@@ -66,6 +66,20 @@
         }
         .action-btn:active { transform: scale(0.95); }
 
+        /* 确认弹窗 */
+        .modal-card { background: #fff; border-radius: 24px 24px 0 0; }
+        .duration-btn {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        .duration-btn.active {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+        }
+
         /* Tab激活 */
         .tab-active { color: var(--primary); background: rgba(26,82,118,0.08); }
 
@@ -110,22 +124,24 @@
 
                 <!-- 流动人员列表 - 逐人确认 -->
                 <div class="space-y-2 mb-3">
+                    <!-- 已出监+已到达，仅显示归监按钮 -->
                     <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-800">张三 · 430100-0105</p>
-                                <p class="text-xs text-green-600">已出监 · 已到达</p>
+                                <p onclick="event.stopPropagation(); openDoneModal('arrive')" class="text-xs text-green-600 cursor-pointer">已出监 · 已到达</p>
                             </div>
                         </div>
-                        <button onclick="event.stopPropagation(); openConfirmModal('out')" class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">已出监</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('back')" class="text-xs px-2 py-1 bg-orange-500 text-white rounded">归监确认</button>
                     </div>
-                    <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                    <!-- 已出监，待到达 -->
+                    <div class="flex items-center justify-between p-2 rounded-lg">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400 text-xs"></i></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-800">李四 · 430100-0106</p>
-                                <p class="text-xs text-green-600">已出监</p>
+                                <p onclick="event.stopPropagation(); openDoneModal('out')" class="text-xs text-green-600 cursor-pointer">已出监</p>
                             </div>
                         </div>
                         <div class="flex gap-1">
@@ -156,15 +172,15 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800">刘某某 · 430100-0112</p>
-                        <p class="text-xs text-gray-500">1-2监区 → 会见楼</p>
+                        <p class="text-xs text-orange-500">待出监</p>
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-400">
                     <span><i class="fas fa-clock mr-1"></i>2026-05-22 10:15 出发</span>
                     <div class="flex gap-2">
-                        <button onclick="event.stopPropagation(); openConfirmModal('out')" class="action-btn bg-green-50 text-green-600">出监确认</button>
-                        <button onclick="event.stopPropagation(); openConfirmModal('arrive')" class="action-btn bg-blue-50 text-blue-600">到达确认</button>
-                        <button onclick="event.stopPropagation(); openConfirmModal('back')" class="action-btn bg-orange-50 text-orange-600">归监确认</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('out')" class="action-btn bg-green-500 text-white">出监确认</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('arrive')" class="action-btn bg-blue-500 text-white">到达确认</button>
+                        <button onclick="event.stopPropagation(); openConfirmModal('back')" class="action-btn bg-orange-500 text-white">归监确认</button>
                     </div>
                 </div>
             </div>
@@ -285,7 +301,7 @@
                     <div class="bg-gray-50 rounded-xl p-4 mb-4">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>
-                            <div><p class="text-sm font-medium text-gray-800">张某某</p><p class="text-xs text-gray-400">430100-0105</p></div>
+                        <div><p class="text-sm font-medium text-gray-800">张某某</p><p class="text-xs text-gray-400">430100-0105</p></div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-xs text-gray-500">
                             <div>流动类型: 监内就医</div>

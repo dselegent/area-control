@@ -245,7 +245,7 @@
                                 <td class="px-4 py-3"><span class="status-tag bg-gray-100 text-gray-500">草稿</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        <button class="text-blue-500 hover:text-blue-600 text-sm" onclick="openModal('detailModal')">编辑并提交</button>
+                                        <button class="text-blue-500 hover:text-blue-600 text-sm" onclick="openEditModal()">编辑并提交</button>
                                     </div>
                                 </td>
                             </tr>
@@ -400,8 +400,8 @@
                 </form>
             </div>
             <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
-                <button onclick="saveDraft()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">保存草稿</button>
                 <button onclick="closeModal('applyModal')" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">取消</button>
+                <button onclick="saveDraft()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">保存草稿</button>
                 <button onclick="submitApplication()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">提交申请</button>
             </div>
         </div>
@@ -631,6 +631,12 @@
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // 编辑并提交 - 打开申请弹窗进行编辑
+        function openEditModal() {
+            // 这里可以预填要编辑的数据，然后打开申请弹窗
+            openModal('applyModal');
+        }
 
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
